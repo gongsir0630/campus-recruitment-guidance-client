@@ -14,4 +14,13 @@
 
 <style>
 	/*每个页面公共css */
+  /* vant - weapp */
+  @import '/wxcomponents/@vant/weapp/dist/common/index.wxss';
+
+  /* color ui */
+  @import 'colorui/main.css';
+  @import 'colorui/icon.css';
+
+  /* 自定义 */
+  @import "./public.scss";
 </style>

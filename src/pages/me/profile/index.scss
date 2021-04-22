@@ -1,0 +1,24 @@
+.mine-info{
+  height: 250upx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.msg-publish{
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25%;
+  height: 50px;
+  border-radius: 25px;
+  background: #fa8c15;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .msg-text{
+    margin-left: 4px;
+  }
+}

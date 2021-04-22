@@ -1,0 +1,25 @@
+.fankui-box{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 100vw;
+  height: 400px;
+
+  .fankui,
+  .kefu{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #fa8c15;
+    text-align: center;
+    line-height: 100px;
+
+    .myicon{
+      font-size:32px;
+    }
+  }
+  .myline{
+    text-align: center;
+  }
+}

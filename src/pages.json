@@ -1,16 +1,105 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+  "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+    {
+      "path": "pages/me/index",
+      "style": {
+        "navigationBarTitleText": "个人中心"
+      }
+    },
+    {
+      "path": "pages/me/profile/index"
+    },
+    {
+      "path": "pages/me/auth/index"
+    },
+    {
+      "path": "pages/me/content/index"
+    },
+    {
+      "path": "pages/me/about/index"
+    },
+    {
+      "path": "pages/me/joinUs/index"
+    },
+    {
+      "path": "pages/me/feedBack/index"
+    },
+    {
+      "path": "pages/me/feedBack/fanDetail/index"
+    },
+    {
+      "path": "pages/me/feedBack/list/index"
+    },
+    {
+      "path": "pages/demo/vuex/index",
+      "style": {
+        "navigationBarTitleText": "vuex 使用示例"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "柚动态"
+      }
+    },
+    {
+      "path": "pages/neitui/index",
+      "style": {
+        "navigationBarTitleText": "柚内推"
+      }
+    },
+    {
+      "path": "pages/help/index",
+      "style": {
+        "navigationBarTitleText": "柚子帮"
+      }
+    },
+    {
+      "path": "pages/help/apply/index"
+    }
+  ],
+  "globalStyle": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8",
+    // 此处引入 vant-weapp 组件
+    "usingComponents": {
+      "van-button": "/wxcomponents/@vant/weapp/dist/button/index",
+      "van-icon": "/wxcomponents/@vant/weapp/dist/icon/index",
+      "van-nav-bar": "/wxcomponents/@vant/weapp/dist/nav-bar/index",
+      "van-toast": "/wxcomponents/@vant/weapp/dist/toast/index"
+    }
+  },
+  "tabBar": {
+    "color": "#000",
+    "selectedColor": "#fa8c15",
+    "list": [
+      {
+        "pagePath":"pages/index/index",
+        "text":"柚动态",
+        "iconPath":"static/tabbar/don.png",
+        "selectedIconPath":"static/tabbar/don_cur.png"
+      },
+      {
+        "pagePath":"pages/neitui/index",
+        "text":"柚内推",
+        "iconPath":"static/tabbar/nei.png",
+        "selectedIconPath":"static/tabbar/nei_cur.png"
+      },
+      {
+        "pagePath":"pages/help/index",
+        "text":"柚子帮",
+        "iconPath":"static/tabbar/help.png",
+        "selectedIconPath":"static/tabbar/help_cur.png"
+      },
+      {
+        "pagePath":"pages/me/index",
+        "text":"我的",
+        "iconPath":"static/tabbar/my.png",
+        "selectedIconPath":"static/tabbar/my_cur.png"
+      }
+    ]
+  }
 }

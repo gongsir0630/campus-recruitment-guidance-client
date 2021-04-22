@@ -1,0 +1,46 @@
+.mine-info{
+  height: 250upx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  .mine-name{
+    margin: 0 40upx;
+  }
+}
+.mine{
+  width: 100vw;
+  padding: 20upx;
+}
+.func-box{
+  width: 100vw;
+  height: 120px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #fff;
+
+  .func-item{
+    width: 60px;
+    height: 60px;
+    background: #fa8c15;
+    border-radius: 50%;
+    line-height: 60px;
+    text-align: center;
+
+    .my_icon{
+      font-size: 30px;
+      color: #fff;
+    }
+  }
+  .my_line{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+.info {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-left: 40rpx;
+}
