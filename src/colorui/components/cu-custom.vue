@@ -9,7 +9,7 @@
 			</view>
 			<!-- 搜索栏 -->
 			<view class="left" v-if="isSearch">
-				<text class="cuIcon-search" @tap="toSearch"></text>
+				<text class="cuIcon-search margin-left" @tap="toSearch"></text>
 				<slot name="search"></slot>
 			</view>
 			<!-- 切换 -->

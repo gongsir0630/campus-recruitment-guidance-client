@@ -10,7 +10,7 @@
     </view>
     <!-- 人脉卡片 -->
     <view>
-      <view class="cu-card dynamic" v-for="item in renCardList" :key="item.id" @tap="toRenPage">
+      <view class="cu-card dynamic" v-for="item in renCardList" :key="item.id" @tap="toDetail">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
@@ -95,8 +95,8 @@ export default {
     toApply() {
       uni.navigateTo({url: './apply/index'})
     },
-    toRenPage() {
-      uni.navigateTo({url: '../renCard/index'})
+    toDetail () {
+      uni.navigateTo({url: './detail/index'})
     }
   }
 }

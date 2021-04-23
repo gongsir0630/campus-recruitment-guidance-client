@@ -25,7 +25,7 @@
           <!-- <text class="sex">{{ sex }}</text> -->
         </view>
         <!-- vant-weapp 轻提示 -->
-        <van-toast id="van-toast"/>
+        <!-- <van-toast id="van-toast"/> -->
       </view>
     </view>
 

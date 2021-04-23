@@ -1,0 +1,52 @@
+.background{
+  width: 100vw;
+  height: 100vh;
+}
+.banner{
+  height: 200px;
+}
+.notice{
+  margin: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+
+  .notice-item{
+    margin:8px 2px;
+  }
+
+  .notice-number{
+    margin-right: 6px;
+  }
+  .notice-hottag{
+    float: right;
+    padding: 2px;
+    border:1px solid red;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+}
+.movecard-icon{
+  display: flex;
+  justify-content: space-around;
+}
+.msg-publish{
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25%;
+  height: 50px;
+  border-radius: 25px;
+  background: #fa8c15;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .msg-text{
+    margin-left: 4px;
+  }
+}
+.my-content{
+  text-align: center;
+}
