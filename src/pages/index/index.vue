@@ -21,6 +21,8 @@
           <text class="notice-content text-blue">查看更多</text>
           <text class="cuIcon-right text-blue"></text>
         </view>
+        <!-- 公告弹窗 -->
+        <van-dialog id="van-dialog" />
       </view>
     </view>
 
@@ -79,7 +81,7 @@
 <script>
 import Swiper from '@/components/Swiper';
 // 引入 vant-weapp-dialog 组件 -> 公告弹窗查看详情
-import Dialog from '@/wxcomponents/@vant/weapp/dist/dialog/dialog';
+import Dialog from '../../wxcomponents/@vant/weapp/dist/dialog/dialog';
 let test = {
   id:1,
   avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
@@ -148,6 +150,12 @@ export default {
      */
     showNotice(notice) {
       // 弹窗显示公告详情
+      // uni.showModal({
+      //   title: notice.title,
+      //   content: notice.content,
+      //   showCancel:false,
+      //   confirmText: '我知道了'
+      // })
       Dialog.alert({
         title: notice.title,
         message: notice.content,
