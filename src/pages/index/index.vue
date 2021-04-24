@@ -21,7 +21,7 @@
           <text class="notice-content text-blue">查看更多</text>
           <text class="cuIcon-right text-blue"></text>
         </view>
-        <!-- 公告弹窗 -->
+        <!-- vant-weapp 公告弹窗 -->
         <van-dialog id="van-dialog" />
       </view>
     </view>
@@ -45,9 +45,10 @@
                   {{ item.major }}
                 </view>
               </view>
+              <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap.stop="onShare"></view>
             </view>
           </view>
-          <view class="text-content">
+          <view class="margin-top text-content">
             {{ item.content }}
           </view>
           <view class="grid flex-sub padding-lr col-1">
@@ -75,6 +76,14 @@
         <text class="msg-text">发布</text>
       </view>
     </view>
+
+    <van-share-sheet
+      :show="showShare"
+      title="立即分享给好友"
+      :options="options"
+      @select="onSelect"
+      @close="onClose"
+    />
   </view>
 </template>
 
@@ -97,6 +106,18 @@ let test = {
 export default {
   data() {
     return {
+      showShare: false,
+      options: [[
+        { name: '微信', icon: 'wechat', openType: 'share' },
+        { name: '微博', icon: 'weibo' },
+        { name: '复制链接', icon: 'link' },
+        { name: '分享海报', icon: 'poster' },
+        { name: '二维码', icon: 'qrcode' },
+      ],[
+        { name: '收藏', icon: 'link' },
+        { name: '删除', icon: 'poster' },
+        { name: '修改', icon: 'qrcode' },
+      ]],
       // 公告列表
       notices: [{
         id: 1,
@@ -134,6 +155,29 @@ export default {
 
   },
   methods: {
+    /**
+     * share
+     * @param event
+     */
+    onShare(event) {
+      // console.log(event)
+      // 暂时隐藏 tabBar
+      uni.hideTabBar()
+      this.showShare = true
+    },
+    // close share
+    onClose() {
+      this.showShare = false
+      uni.showTabBar()
+    },
+    /**
+     * share item
+     * @param event
+     */
+    onSelect(event) {
+      console.log(event.detail.name);
+      this.onClose();
+    },
     /**
      * 页面跳转
      */

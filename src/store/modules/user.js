@@ -1,7 +1,7 @@
 const state = {
   token: uni.getStorageSync('token'),
   avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-  nickname: '未登录',
+  nickname: '码之泪殇',
   gender: 1
 }
 

@@ -24,8 +24,6 @@
           <!-- TODO:性别用颜色加以区分 -->
           <!-- <text class="sex">{{ sex }}</text> -->
         </view>
-        <!-- vant-weapp 轻提示 -->
-        <!-- <van-toast id="van-toast"/> -->
       </view>
     </view>
 
@@ -77,7 +75,8 @@
         </button>
       </view>
     </view>
-
+    <!-- vant-weapp 轻提示 -->
+    <van-toast id="van-toast" />
   </view>
 </template>
 

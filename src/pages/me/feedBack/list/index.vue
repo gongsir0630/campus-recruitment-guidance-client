@@ -5,7 +5,7 @@
         <block slot="right">反馈记录</block>
       </cu-custom>
 
-      <text>你还没有反馈过奥~~</text>
+      <van-empty description="你还没有反馈过奥~~"/>
     </view>
 </template>
 

@@ -5,7 +5,7 @@
       <block slot="right">动态详情</block>
     </cu-custom>
     <!-- 动态详情 -->
-    <view class="movecard">
+    <view>
       <view class="cu-card dynamic no-card">
         <view class="cu-item shadow">
           <!-- 用户信息 -->
@@ -24,10 +24,11 @@
                   {{ item.major }}
                 </view>
               </view>
+              <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap="onShare"></view>
             </view>
           </view>
           <!-- 内容 -->
-          <view class="text-content">
+          <view class="margin-top text-content">
             {{ item.content }}
           </view>
           <!-- 图片 -->
@@ -38,25 +39,36 @@
           <van-divider contentPosition="center">
             <text class="text-orange">点个赞吧</text>
           </van-divider>
-
-          <view class="dian-name" @tap="moreDian">
+          <!-- 点赞名单 -->
+          <view class="dian-name" @tap="toPage('/like/index')">
             <text class="cuIcon-appreciatefill text-blue"></text>
-            <text class="text-content text-blue">name1,name2等X人觉得很赞</text>
+            <text class="text-content">
+              <text v-if="allLikeList.includes(nickname)" class="text-orange">
+                {{ nickname + (allLikeList.length>1 ? ', ':'') }}
+              </text>
+              <text v-if="allLikeList.includes(nickname) && allLikeList.length>1" class="text-blue">
+                {{ allLikeList.slice(1,10).join(", ") }}
+              </text>
+              <text v-else class="text-blue">
+                {{ allLikeList.slice(0,10).join(", ") }}
+              </text>
+            </text>
           </view>
           <view class="dian-box">
-            <button class="cu-btn line-gray round lg"
-                    @tap="toDian">
-              <text class="cuIcon-appreciate" :class="isDian?'text-orange':'text-gray'">点赞</text>
+            <button class="cu-btn line-gray round"
+                    @tap="toLike">
+              <text class="cuIcon-appreciate" :class="isLike?'text-orange':'text-gray'">&nbsp;点赞</text>
             </button>
-            <button class="cu-btn line-gray round lg"
+            <button class="cu-btn line-gray round"
                     @tap="onShare">
               <text class="cuIcon-share text-gray">分享</text>
             </button>
-            <button class="cu-btn line-gray round lg" @tap="toShou">
-              <text class="cuIcon-favor" :class="isShou?'text-orange':'text-gray'">收藏</text>
+            <button class="cu-btn line-gray round" @tap="toCollection">
+              <text class="cuIcon-favor" :class="isCollection?'text-orange':'text-gray'">收藏</text>
             </button>
           </view>
 
+          <!-- vant-weapp 分享面板 -->
           <van-share-sheet
             :show="showShare"
             title="立即分享给好友"
@@ -67,54 +79,31 @@
         </view>
       </view>
     </view>
-    <!-- 弹框 -->
-    <view class="cu-modal" :class="modalName=='RadioModal'?'show':''" @tap="hideModal">
-      <view class="cu-dialog" @tap.stop="">
-        <radio-group class="block" @change="RadioChange">
-          <view class="cu-list menu text-left">
-            <view class="cu-item">
-              <label class="flex justify-between align-center flex-sub">
-                <view class="flex-sub">删除</view>
-                <radio class="round"></radio>
-              </label>
-            </view>
-            <view class="cu-item">
-              <label class="flex justify-between align-center flex-sub">
-                <view class="flex-sub">修改</view>
-                <radio class="round"></radio>
-              </label>
-            </view>
-            <view class="cu-item">
-              <label class="flex justify-between align-center flex-sub">
-                <view class="flex-sub">收藏</view>
-                <radio class="round"></radio>
-              </label>
-            </view>
-            <view class="cu-item">
-              <label class="flex justify-between align-center flex-sub">
-                <view class="flex-sub">投诉</view>
-                <radio class="round"></radio>
-              </label>
-            </view>
-          </view>
-        </radio-group>
-      </view>
-    </view>
+
+    <!-- vant-weapp 轻提示 -->
+    <van-toast id="van-toast" />
   </view>
 </template>
 
 <script>
+import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
+import {mapState} from 'vuex';
 export default {
   data() {
     return {
+      allLikeList:['码之泪殇','深邃','🍄','helloTest'],
       showShare: false,
-      options: [
+      options: [[
         { name: '微信', icon: 'wechat', openType: 'share' },
         { name: '微博', icon: 'weibo' },
         { name: '复制链接', icon: 'link' },
         { name: '分享海报', icon: 'poster' },
         { name: '二维码', icon: 'qrcode' },
-      ],
+      ],[
+        { name: '收藏', icon: 'link' },
+        { name: '删除', icon: 'poster' },
+        { name: '修改', icon: 'qrcode' },
+      ]],
       item: {
         id: 1,
         avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
@@ -127,50 +116,58 @@ export default {
         content: '这是一条测试动态',
         imgUrl: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
       },
-      isDian: false,
-      isShou: false,
-      modalName: null
+      isLike: false,
+      isCollection: false
     }
   },
+  computed: {
+    ...mapState('user',['nickname','avatar'])
+  },
   methods: {
+    /**
+     * share
+     * @param event
+     */
     onShare(event) {
       console.log(event)
       this.showShare = true
     },
-
+    // close share
     onClose() {
       this.showShare = false
     },
-
+    /**
+     * share item
+     * @param event
+     */
     onSelect(event) {
       console.log(event.detail.name);
       this.onClose();
     },
-    showModal(e) {
-      this.modalName = e.currentTarget.dataset.target
-    },
-    hideModal() {
-      this.modalName = null;
-    },
-    RadioChange(e) {
-      console.log(e);
-    },
-    toDian() {
-      if (!this.isDian) {
-        this.isDian = true;
+    toLike () {
+      // TODO: 异步请求
+      if (this.isLike) {
+        this.allLikeList.shift()
       } else {
-        this.isDian = false;
+        this.allLikeList.unshift(this.nickname)
       }
+      this.isLike = !this.isLike
     },
-    toShou() {
-      if (!this.isShou) {
-        this.isShou = true;
-      } else {
-        this.isShou = false;
+    toCollection () {
+      this.isCollection ? Toast.success('已取消收藏') : Toast.success('收藏成功')
+      this.isCollection = !this.isCollection
+    },
+    /**
+     * page-router
+     * @param url page-url
+     */
+    toPage (url) {
+      uni.navigateTo({url})
+    },
+    onLoad () {
+      if (this.allLikeList.includes(this.nickname)) {
+        this.isLike = true
       }
-    },
-    moreDian() {
-      uni.navigateTo({url: '../dianzan/index'})
     }
   },
 }

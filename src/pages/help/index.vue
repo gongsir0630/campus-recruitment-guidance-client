@@ -18,7 +18,7 @@
                 <image class="cu-avatar lg round" :src="item.avatar"/>
               </view>
               <view class="content flex-sub">
-                <view>{{ item.nickName }}</view>
+                <view class="text-orange">{{ item.nickName }}</view>
                 <!-- 多个头衔使用 join 函数处理 -->
                 <text class="text-sm">
                   {{ item.title.join(" | ") }}
