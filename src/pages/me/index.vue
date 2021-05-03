@@ -8,7 +8,7 @@
       <view class="mine-info">
         <view class="cu-avatar xl margin-left round">
 <!--          <open-data type="userAvatarUrl"></open-data>-->
-           <image class="cu-avatar xl margin-left round" :src="avatar"></image>
+           <image class="cu-avatar xl margin-left round" :src="wxUser.avatar"></image>
         </view>
         <button
           v-if="showLogin"
@@ -93,15 +93,26 @@ export default {
     }
   },
   computed: {
-    ...mapState('user', ['avatar', 'nickname', 'gender']),
+    ...mapState('user', ['wxUser','isLogin','token']),
     sex() {
-      return this.gender === Gender.MALE ? '♂' : '♀'
+      return this.wxUser.gender === Gender.MALE ? '♂' : '♀'
     }
   },
   methods: {
     // 引入 user 命名空间下的方法
-    ...mapActions('user', ['setToken', 'setUserInfo']),
-
+    ...mapActions('user', ['setToken', 'setUserInfo','setLoginStatus']),
+    ...mapActions('edu', ['getEduInfoById']),
+    ...mapActions('job', ['getJobInfoById']),
+    /**
+     *
+     */
+    onShow () {
+      console.log(this.toLogin)
+      // token有效则自动登录
+      if (this.token && this.isLogin) {
+        this.showLogin = false
+      }
+    },
     /**
      * 页面路由跳转
      * @param url 页面路径
@@ -120,15 +131,12 @@ export default {
       // 只能获取匿名的无用信息,换用open-data展示头像与昵称
       getUserProfile()
         .then(async ([err, res]) => {
-          // if (!res) {
-          // this.showLogin = true
-          // return
-          // }
+          // 临时获取用户的微信公开信息
           const {nickName, gender, avatarUrl} = res?.userInfo
           console.log('用户信息: ' + nickName)
           // 存入vuex
           this.setUserInfo({
-            nickname: nickName,
+            nickName: nickName,
             gender,
             avatar: avatarUrl
           })
@@ -139,16 +147,25 @@ export default {
               const {code, data, errMsg} = await this.$api.user.login(
                 res.code
               )
+              // 首次登录，跳转注册
               if (code === 1000) {
                 // TODO: 注册
                 uni.navigateTo({
-                  url: './profile/index'
+                  url: `./profile/index?toLogin=${true}`,
                 })
               }
-              // 换取token
+              // 直接登录
+              // 获取 token
               const token = data.token
+              // 获取用户信息
+              const userInfo = data.userInfo
               // 存入vuex
               this.setToken(token)
+              this.setUserInfo(userInfo)
+              // eduInfo
+              await this.getEduInfoById(this.wxUser.eduId)
+              // jobInfo
+              await this.getJobInfoById(this.wxUser.jobId)
               Toast.success({
                 message: '登录成功',
                 forbidClick: true

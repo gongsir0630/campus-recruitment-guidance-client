@@ -8,7 +8,7 @@
     <!-- 信息完善 -->
     <view class="mine-info">
       <view class="cu-avatar xl round margin-left bg-red">
-        <image class="cu-avatar xl margin-left round" :src="avatar"></image>
+        <image class="cu-avatar xl margin-left round" :src="wxUser.avatar"></image>
       </view>
     </view>
     <!-- 设置信息 -->
@@ -75,8 +75,8 @@
       </view>
       <view class="cu-form-group">
         <view class="title">专业名称</view>
-        <picker @change="indexChange('major',$event)" :value="index" :range="majPicker">
-          <view class="picker">{{majPicker[0]}}</view>
+        <picker @change="indexChange('major',$event)" :value="majIndex" :range="majPicker">
+          <view class="picker">{{majPicker[majIndex]}}</view>
         </picker>
       </view>
       <view class="cu-form-group">
@@ -98,8 +98,8 @@
         </view>
         <view class="cu-form-group">
           <view class="title">公司名称</view>
-          <picker @change="indexChange('company',$event)" :value="companyIndex" :range="companyPicker">
-            <view class="picker">{{companyPicker[companyIndex]}}</view>
+          <picker @change="indexChange('company',$event)" :value="companyIndex" :range="companyPicker" range-key="name">
+            <view class="picker">{{companyPicker[companyIndex].name}}</view>
           </picker>
         </view>
         <view class="cu-form-group">
@@ -124,54 +124,19 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 import {Gender} from "@/constants";
-let wxUser = {
-  avatar: '',
-  nickName:'码之泪殇',
-  gender: '男',
-  realName: '龚涛',
-  phoneNumber:'17361040630',
-  email:'gongsir0630@gmail.com',
-  profile:'个人简介'
-}
-let jobInfo = {
-  department:'研发',
-  jobTitle:'Java 研发',
-  description:'经历描述',
-}
-let eduInfo = {
-  schoolId:'',
-  major:'',
-  entrance:'',
-  graduate:'',
-  level:'',
-  description:''
-}
+
 export default {
   data(){
     return{
-      wxUser,
-      eduInfo,
-      jobInfo,
+      toLogin:false,
       // 选择器，部分需要从 api 初始化
       sexPicker:['男','女'],
-      schPicker:[{
-        id:1,
-        name:'西南石油大学'
-      },{
-        id:2,
-        name:'四川大学'
-      }],
-      majPicker:['计算机科学与技术','软件工程'],
+      schPicker:[],
+      majPicker:[],
       levelPicker:['本科','硕士','博士及以上'],
-      companyPicker:[{
-        id:1,
-        name:'快手'
-      },{
-        id:2,
-        name:'美团'
-      }],
+      companyPicker:[],
       nowPicker:['学生（提交教育信息）','工作（提交教育信息和工作信息）'],
       sexIndex:0,
       schIndex:0,
@@ -183,49 +148,82 @@ export default {
     }
   },
   computed: {
-    ...mapState('user', ['avatar', 'nickname', 'gender']),
+    ...mapState('user', ['wxUser','isLogin']),
+    ...mapState('edu', ['eduInfo']),
+    ...mapState('job', ['jobInfo']),
     sex() {
-      this.genterIndex = this.gender-1;
-      return this.gender === Gender.MALE ? '♂' : '♀'
+      this.genderIndex = this.wxUser.gender === '男' ? 0 : 1
+      return this.wxUser.gender === Gender.MALE ? '♂' : '♀'
     }
   },
   methods:{
-    onLaunch () {
-      this.userInfo.nickName = this.nickname
+    ...mapActions('edu',['getEduInfoById']),
+    ...mapActions('job',['getJobInfoById']),
+    onLoad ({toLogin}) {
+      // 是否自动登录
+      this.toLogin = toLogin
+      this.dataInit()
+    },
+    /**
+     * 页面数据预拉取：学校、公司下拉列表
+     */
+    dataInit () {
+      console.log("--->获取学校下拉列表<---")
+      this.schPicker = this.$api.school.getSchoolList()
+      console.log(this.schPicker)
+      // 选中我的学校
+      this.schPicker.forEach(sch => {
+        if (this.eduInfo.schoolId === sch.id) {
+          this.schIndex = this.schPicker.indexOf(sch)
+        }
+      })
+      // 专业列表变化
+      this.majPicker = this.schPicker[this.schIndex].majors
+
+      console.log("--->获取公司下拉列表<---")
+      this.companyPicker = this.$api.company.getCompanyList()
+      console.log(this.companyPicker)
+      // 选中我的公司
+      this.companyPicker.forEach(com => {
+        if (this.jobInfo.companyId === com.id)
+          this.companyIndex = this.companyPicker.indexOf(com)
+      })
     },
     // 更新用户信息
     async toUpdate() {
-      wxUser.avatar = this.avatar;
-      wxUser.gender = this.sexPicker[this.genderIndex];
+      this.wxUser.gender = this.sexPicker[this.genderIndex];
 
-      eduInfo.major = this.majPicker[this.majIndex];
-      eduInfo.level = this.levelPicker[this.levelIndex];
-      eduInfo.schoolId = this.schPicker[this.schIndex].id;
-      jobInfo.companyId = this.companyPicker[this.companyIndex].id;
+      this.eduInfo.major = this.majPicker[this.majIndex];
+      this.eduInfo.level = this.levelPicker[this.levelIndex];
+      this.eduInfo.schoolId = this.schPicker[this.schIndex].id;
+      this.jobInfo.companyId = this.companyPicker[this.companyIndex].id;
       let userInfo = {
-        wxUser,
-        eduInfo,
-        jobInfo
+        wxUser: this.wxUser,
+        eduInfo: this.eduInfo,
+        jobInfo: this.jobInfo
       }
       console.log(userInfo)
       const { code,errMsg,data } = await this.$api.user.updateUserInfo(userInfo)
       console.log(errMsg)
       if (code === 0) {
-        uni.showToast({
-          title:errMsg
-        })
+        if (this.toLogin) {
+          this.isLogin = false
+        } else {
+          uni.showToast({
+            title:'信息更新成功'
+          })
+        }
       }
     },
     // 选择器切换
     indexChange (type, e) {
-      console.log(type+":"+e.target.value)
-      console.log(typeof +e.target.value)
       switch (type) {
         case 'status':
           this.nowIndex = +e.target.value;
           break;
         case 'school':
           this.schIndex = +e.target.value;
+          this.majPicker = this.schPicker[this.schIndex].majors
           break;
         case 'major':
           this.majIndex = +e.target.value;

@@ -17,7 +17,7 @@
 ### 后端API：[点击前往部署](https://github.com/gongsir0630/campus-recruitment-guidance)
 ### Clone This Project
 ```shell
-git clone https://github.com/gongsir0630/campus-recruitment-guidance-miniapp.git
+git clone https://github.com/gongsir0630/campus-recruitment-guidance-client.git
 ```
 ### Install Dependency
 ```shell
@@ -34,6 +34,8 @@ yarn dev:mp-weixin
 ### Compiles and minifies for production
 ```shell
 npm run build:mp-weixin
+or
+yarn build:mp-weixin
 ```
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).

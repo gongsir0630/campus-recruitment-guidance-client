@@ -24,36 +24,6 @@ page {
   }
 }
 
-.nei-bottom {
-  position: fixed;
-  bottom: 20px;
-  width: 80%;
-  height: 50px;
-  transform: translateX(15%);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .left,
-  .right {
-    width: 48%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 25px;
-    background: #fff;
-  }
-
-  .left {
-    background: #fa8c15;
-  }
-
-  .right {
-    background: #fa8c15;
-  }
-}
-
 .topbg {
   height: 100px;
   width: 100%;

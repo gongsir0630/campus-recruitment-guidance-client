@@ -29,11 +29,17 @@
           </view>
           <!-- 内容 -->
           <view class="margin-top text-content">
-            {{ item.content }}
+            {{ item.detail.content }}
           </view>
           <!-- 图片 -->
-          <view class="grid flex-sub padding-lr col-1">
-            <image :src="item.imgUrl"></image>
+          <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
+            <image :src="item.detail.imgUrl"></image>
+          </view>
+          <view class="movecard-tag  padding">
+            <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
+                  :key="idx" class='cu-tag radius text-blue'>
+              {{ '#' + tag }}
+            </view>
           </view>
           <!-- 互动功能 -->
           <van-divider contentPosition="center">
@@ -41,30 +47,27 @@
           </van-divider>
           <!-- 点赞名单 -->
           <view class="dian-name" @tap="toPage('/like/index')">
-            <text class="cuIcon-appreciatefill text-blue"></text>
+            <text v-if="item.isLike || allLikeList.length>0" class="cuIcon-appreciatefill text-blue"></text>
             <text class="text-content">
-              <text v-if="allLikeList.includes(nickname)" class="text-orange">
-                {{ nickname + (allLikeList.length>1 ? ', ':'') }}
+              <text v-if="item.isLike" class="text-orange">
+                {{ wxUser.nickName + (allLikeList.length > 0 ? ', ' : '') }}
               </text>
-              <text v-if="allLikeList.includes(nickname) && allLikeList.length>1" class="text-blue">
-                {{ allLikeList.slice(1,10).join(", ") }}
-              </text>
-              <text v-else class="text-blue">
-                {{ allLikeList.slice(0,10).join(", ") }}
+              <text class="text-blue">
+                {{ nickNameList }}
               </text>
             </text>
           </view>
           <view class="dian-box">
             <button class="cu-btn line-gray round"
-                    @tap="toLike">
-              <text class="cuIcon-appreciate" :class="isLike?'text-orange':'text-gray'">&nbsp;点赞</text>
+                    @tap="onLike">
+              <text class="cuIcon-appreciate" :class="item.isLike?'text-orange':'text-gray'">&nbsp;点赞</text>
             </button>
             <button class="cu-btn line-gray round"
                     @tap="onShare">
               <text class="cuIcon-share text-gray">分享</text>
             </button>
-            <button class="cu-btn line-gray round" @tap="toCollection">
-              <text class="cuIcon-favor" :class="isCollection?'text-orange':'text-gray'">收藏</text>
+            <button class="cu-btn line-gray round" @tap="onCollection">
+              <text class="cuIcon-favor" :class="item.collection?'text-orange':'text-gray'">收藏</text>
             </button>
           </view>
 
@@ -81,55 +84,75 @@
     </view>
 
     <!-- vant-weapp 轻提示 -->
-    <van-toast id="van-toast" />
+    <van-toast id="van-toast"/>
+    <van-dialog id="van-dialog"/>
   </view>
 </template>
 
 <script>
 import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
+// 引入 vant-weapp-dialog 组件 -> 公告弹窗查看详情
+import Dialog from '@/wxcomponents/@vant/weapp/dist/dialog/dialog';
+import {Share_Options} from '@/constants'
 import {mapState} from 'vuex';
+
 export default {
   data() {
     return {
-      allLikeList:['码之泪殇','深邃','🍄','helloTest'],
+      allLikeList: ['test1', 'test2', '🍄', 'helloTest'],
+      nickNameList: 'test1, test2',
       showShare: false,
-      options: [[
-        { name: '微信', icon: 'wechat', openType: 'share' },
-        { name: '微博', icon: 'weibo' },
-        { name: '复制链接', icon: 'link' },
-        { name: '分享海报', icon: 'poster' },
-        { name: '二维码', icon: 'qrcode' },
-      ],[
-        { name: '收藏', icon: 'link' },
-        { name: '删除', icon: 'poster' },
-        { name: '修改', icon: 'qrcode' },
-      ]],
+      options: [...Share_Options],
       item: {
-        id: 1,
         avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
         nickName: '码之泪殇',
         jobTitle: '快手 Java 研发线',
         major: '2017级计算机科学与技术',
-        topTags: ['校招指导', '工作内推'],
+        isLike: false,
         likeCount: 199,
-        collection: true,
-        content: '这是一条测试动态',
-        imgUrl: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
+        collection: false,
+        detail: {
+          id: 1,
+          openId: '',
+          content: '这是一条测试动态',
+          imgUrl: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg',
+          topicTags: '',
+          publishTime: '',
+          likeList: '',
+          collectionList: ''
+        }
       },
-      isLike: false,
-      isCollection: false
     }
   },
   computed: {
-    ...mapState('user',['nickname','avatar'])
+    ...mapState('user', ['wxUser']),
+    ...mapState('dynamic', ['dynamic']),
   },
   methods: {
     /**
-     * share
-     * @param event
+     * id 转 idx
      */
-    onShare(event) {
-      console.log(event)
+    id2Idx (id) {
+      let idx = -1
+      for (let dt of this.dynamic.list) {
+        if (dt.detail.id === id) {
+          idx = this.dynamic.list.indexOf(dt)
+          break
+        }
+      }
+      return idx
+    },
+    /**
+     * share
+     */
+    onShare() {
+      let openId = this.item.detail.openId
+      if (openId !== this.wxUser.openId) {
+        // 非本人视角，去掉删除、修改操作
+        this.options = Share_Options.slice(0, 2)
+      } else {
+        this.options = Share_Options
+      }
       this.showShare = true
     },
     // close share
@@ -141,34 +164,83 @@ export default {
      * @param event
      */
     onSelect(event) {
-      console.log(event.detail.name);
+      let opName = event.detail.name
+      console.log(opName);
+      switch (opName) {
+        case "收藏":
+          this.onCollection()
+          break;
+        case "删除":
+          this.onDelete()
+          break;
+        case "修改":
+          break;
+      }
       this.onClose();
     },
-    toLike () {
+    async onLike() {
       // TODO: 异步请求
-      if (this.isLike) {
-        this.allLikeList.shift()
+      await this.$api.dynamic.like(this.item.detail.id)
+      if (this.item.isLike) {
+        this.item.likeCount--
       } else {
-        this.allLikeList.unshift(this.nickname)
+        this.item.likeCount++
       }
-      this.isLike = !this.isLike
+      this.item.isLike = !this.item.isLike
     },
-    toCollection () {
-      this.isCollection ? Toast.success('已取消收藏') : Toast.success('收藏成功')
-      this.isCollection = !this.isCollection
+    async onCollection() {
+      // TODO: 异步请求
+      await this.$api.dynamic.collection(this.item.detail.id)
+      this.item.collection ? Toast.success('已取消收藏') : Toast.success('收藏成功')
+      this.item.collection = !this.item.collection
+    },
+    onDelete() {
+      Dialog.confirm({
+        title: '动态删除',
+        message: '确认要删除这条动态吗',
+      }).then(() => {
+        // 异步请求
+        this.$api.dynamic.deleteById(this.item.detail.id)
+        this.dynamic.list.splice(this.id2Idx(this.item.detail.id), 1)
+        this.dynamic.total--
+        // 返回首页
+        uni.navigateBack({
+          delta:1
+        })
+      })
     },
     /**
      * page-router
      * @param url page-url
      */
-    toPage (url) {
+    toPage(url) {
       uni.navigateTo({url})
     },
-    onLoad () {
-      if (this.allLikeList.includes(this.nickname)) {
-        this.isLike = true
+    /**
+     * 根据动态 id 渲染动态详情
+     * @param id
+     */
+    onLoad ({id}) {
+      // 类型转换，坑
+      id = +id
+      for (let dt of this.dynamic.list) {
+        if (dt.detail.id === id)
+          this.item = dt
       }
-    }
+      let likeList = this.item.detail.likeList
+      this.allLikeList = (likeList || '').split(",").filter(openId => openId !== '')
+      if (this.item.isLike) {
+        // 把自己从点赞列表删除
+        this.allLikeList.splice(this.allLikeList.indexOf(this.wxUser.openId), 1)
+      }
+      console.log(this.allLikeList)
+      this.showLikeList2Name()
+    },
+    async showLikeList2Name () {
+      const {data} = await this.$api.user.getNickNameByOpenIds(this.allLikeList.join(","))
+      console.log(data)
+      this.nickNameList = data.slice(0, Math.min(10, data.length)).join(", ")
+    },
   },
 }
 </script>

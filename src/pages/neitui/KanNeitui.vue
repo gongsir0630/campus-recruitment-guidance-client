@@ -5,7 +5,7 @@
     <view class="cu-bar search bg-white">
       <view class="search-form round">
         <text class="cuIcon-search"></text>
-        <input @focus="toPage('./search/index')" @blur="InputBlur" :adjust-position="false" type="text"
+        <input @focus="toPage('./search/index')" @blur="inputBlur" :adjust-position="false" type="text"
                placeholder="搜索感兴趣的公司或者职业标签" confirm-type="search"/>
         <button class="cu-btn bg-orange shadow-blur round">搜索</button>
       </view>
@@ -28,7 +28,10 @@
     </view>
 
     <view>
-      <view class="cu-card dynamic" v-for="item in neiCardList" :key="item.id" @tap="toPage('./detail/index')">
+      <view class="cu-card dynamic"
+            v-for="(item,idx) in neiCardList"
+            :key="idx"
+            @tap="toPage(`./detail/index/idx=${idx}`)">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
@@ -48,11 +51,15 @@
             </view>
           </view>
           <view class="movecard-tag padding">
-            <view v-for="tag in item.fieldTags" class='cu-tag text-orange bg-orange light radius good-tag'>
+            <view v-for="(tag,tid) in item.fieldTags"
+                  :key="tid"
+                  class='cu-tag text-orange bg-orange light radius good-tag'>
               {{ tag }}
             </view>
           </view>
-          <view v-for="topic in item.topics" class="text-content">
+          <view v-for="(topic,pid) in item.topics"
+                :key="pid"
+                class="text-content">
             <text class="text-white bg-orange text-sm my-tag">#</text>
             <text>{{ topic }}</text>
           </view>
@@ -114,7 +121,7 @@ export default {
     }
   },
   methods: {
-    InputBlur() {
+    inputBlur () {
     },
     toPage(url) {
       uni.navigateTo({url})
@@ -122,10 +129,10 @@ export default {
     changeType() {
       if (this.barText === '推荐') {
         this.barText = '最新';
-        //api
+        //todo: 刷新数据
       } else if (this.barText === '最新') {
         this.barText = '推荐';
-        //api
+        //todo: 刷新数据
       }
     }
   }
@@ -133,11 +140,5 @@ export default {
 </script>
 
 <style lang="scss">
-.banner{
-  height: 200px;
-}
-.neitui-bar {
-  display: flex;
-  justify-content: space-between;
-}
+@import "index";
 </style>

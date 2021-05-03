@@ -10,30 +10,38 @@
     </view>
     <!-- 人脉卡片 -->
     <view>
-      <view class="cu-card dynamic" v-for="item in renCardList" :key="item.id" @tap="toDetail">
+      <view class="cu-card dynamic" v-for="(item,idx) in renCardList"
+            :key="idx"
+            @tap="toDetail(item.member.id)">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
               <view class="cu-avatar round lg">
-                <image class="cu-avatar lg round" :src="item.avatar"/>
+                <image class="cu-avatar lg round" :src="item.member.photo"/>
               </view>
               <view class="content flex-sub">
-                <view class="text-orange">{{ item.nickName }}</view>
+                <view class="text-orange">{{ item.realName }}</view>
                 <!-- 多个头衔使用 join 函数处理 -->
                 <text class="text-sm">
-                  {{ item.title.join(" | ") }}
+                  {{ (item.member.title || '').split(",").join(" | ") }}
                 </text>
               </view>
             </view>
           </view>
-          <view class="movecard-tag padding">
-            <view v-for="tag in item.fieldTags" class='cu-tag text-orange bg-orange light radius good-tag'>
+          <view class="movecard-tag padding flex flex-wrap">
+            <view v-for="(tag,tIdx) in item.member.fieldTags.split(',')"
+                  v-if="tag!==''"
+                  :key="tIdx"
+                  class='cu-tag text-orange bg-orange light radius good-tag'>
               {{ tag }}
             </view>
           </view>
-          <view v-for="topic in item.topics" class="text-content">
+          <view v-for="(topic,index) in JSON.parse(item.member.topics)"
+                v-if="topic!==''"
+                :key="index"
+                class="text-content">
             <text class="text-white bg-orange text-sm my-tag">#</text>
-            <text>{{ topic }}</text>
+            <text>{{ topic.key }}</text>
           </view>
         </view>
       </view>
@@ -43,6 +51,7 @@
 
 <script>
 import Swiper from '@/components/Swiper';
+import {mapState,mapActions} from 'vuex';
 
 export default {
 
@@ -58,62 +67,86 @@ export default {
           type: 'image',
           url: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
         }],
-      renCardList: [
-        {
-          id: 1,
-          avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-          nickName: '码之泪殇',
-          title: ['计算机协会会长', '计算机科学学院学生会主席'],
-          fieldTags: ['简历指导', '笔试面试', '校招内推'],
-          topics: ['就业指导', '学生工作', '项目指导']
+      renCardList: [{
+        companyName:"请先完成职位认证",
+        grade:"2017",
+        major:"计科",
+        member:{
+          applyTime:"2021-04-27",
+          certificationStatus:"待审核",
+          currentState:"工作",
+          fieldTags:"考研保研,校招答疑,简历指导,岗位内推,学科竞赛,校园社团,技术咨询",
+          id:4,
+          introduction:"测试测试",
+          likeCount:1,
+          likeList:"olAW-4vIdX8DTkzftHveDWIlR4zU",
+          openId:"olAW-4vIdX8DTkzftHveDWIlR4zU",
+          photo:"https://cdn.yzhelp.top/campus-recruitment-guidance/visitor/d640f58c-50c5-40f1-a252-36bd8e1f44a9.png",
+          title:"计算机协会会长",
+          topics:'[{"key":"测试1","val":"测试 111"}]'
         },
-        {
-          id: 1,
-          avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-          nickName: '码之泪殇',
-          title: ['计算机协会会长'],
-          fieldTags: ['简历指导', '笔试面试', '校招内推'],
-          topics: ['就业指导', '学生工作', '项目指导']
-        },
-        {
-          id: 1,
-          avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-          nickName: '码之泪殇',
-          title: ['计算机协会会长'],
-          fieldTags: ['简历指导', '笔试面试', '校招内推'],
-          topics: ['就业指导', '学生工作', '项目指导'],
-        }
-      ]
+        realName:"龚涛",
+        selectStatus:"工作"
+      }]
     }
+  },
+  computed: {
+    ...mapState('member',['member']),
+    ...mapState('user',['wxUser'])
   },
   components: {
     Swiper
   },
   methods: {
-    searchPage() {
+    ...mapActions('member',['getMemberList']),
+    /**
+     * 页面加载
+     */
+    onShow () {
+      this.loadMember()
+    },
+    /**
+     * 异步加载成员信息
+     */
+    async loadMember () {
+      await this.getMemberList(null)
+      this.renCardList = this.member.list
     },
     toApply() {
       uni.navigateTo({url: './apply/index'})
     },
-    toDetail () {
-      uni.navigateTo({url: './detail/index'})
+    /**
+     * 详情
+     * @param id
+     */
+    toDetail (id) {
+      uni.navigateTo({url: `./detail/index?id=${id}`})
+    },
+    /**
+     * 页面跳转
+     */
+    searchPage () {
+      uni.navigateTo({url:'./search/index'})
+    },
+    /**
+     * id 定位 idx
+     * @param id
+     * @returns {number}
+     */
+    id2Idx (id) {
+      let idx = -1
+      for (let item of this.member.list) {
+        if (item.member.id === id) {
+          idx = this.member.list.indexOf(item)
+          break
+        }
+      }
+      return idx
     }
   }
 }
 </script>
 
 <style lang="scss">
-.banner {
-  height: 200px;
-}
-
-.my-tag {
-  border-radius: 50%;
-  padding: 4px;
-  margin-right: 10px;
-}
-
-.good-tag {
-  margin-right: 10px;
-}
+@import "index";
 </style>

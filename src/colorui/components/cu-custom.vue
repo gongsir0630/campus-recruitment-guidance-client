@@ -8,8 +8,8 @@
 				<slot name="back"></slot>
 			</view>
 			<!-- 搜索栏 -->
-			<view class="left" v-if="isSearch">
-				<text class="cuIcon-search margin-left" @tap="toSearch"></text>
+			<view class="left" v-if="isSearch" @tap="toSearch">
+				<text class="cuIcon-search margin-left"></text>
 				<slot name="search"></slot>
 			</view>
 			<!-- 切换 -->
@@ -127,6 +127,7 @@
 			display: flex;
 			position: fixed;
 			left: 5px;
+      align-items: center;
 
 			text{
 				margin-right: 5px;

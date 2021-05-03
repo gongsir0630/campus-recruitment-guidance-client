@@ -14,8 +14,8 @@
 
 <script>
 
-import KanNeitui from '@/components/KanNeitui';
-import FaNeitui from '@/components/FaNeitui';
+import KanNeitui from '@/pages/neitui/KanNeitui';
+import FaNeitui from '@/pages/neitui/FaNeitui';
 
 export default {
   components: {
@@ -24,17 +24,17 @@ export default {
   },
   data() {
     return {
-      typename: '看内推',
+      typename: '发内推',
       neiType: true
     }
   },
   methods: {
     changType() {
       if (this.typename === '发内推') {
-        this.neiType = true;
+        this.neiType = false;
         this.typename = '看内推';
       } else if (this.typename === '看内推') {
-        this.neiType = false;
+        this.neiType = true;
         this.typename = '发内推';
       }
     }

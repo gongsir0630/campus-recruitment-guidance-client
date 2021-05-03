@@ -1,9 +1,11 @@
 {
-  "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+  "pages": [
+    //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "柚动态"
+        "navigationBarTitleText": "柚动态",
+        "onReachBottomDistance": 50
       }
     },
     {
@@ -11,6 +13,12 @@
     },
     {
       "path": "pages/index/detail/index"
+    },
+    {
+      "path": "pages/index/search/index"
+    },
+    {
+      "path": "pages/index/publish/index"
     },
     {
       "path": "pages/neitui/index",
@@ -29,6 +37,9 @@
     },
     {
       "path": "pages/help/detail/index"
+    },
+    {
+      "path": "pages/help/search/index"
     },
     {
       "path": "pages/me/index",
@@ -76,10 +87,27 @@
     // 此处引入 vant-weapp 组件
     "usingComponents": {
       "van-toast": "wxcomponents/@vant/weapp/dist/toast/index",
+      // 提示
       "van-dialog": "wxcomponents/@vant/weapp/dist/dialog/index",
+      // 弹出
       "van-empty": "wxcomponents/@vant/weapp/dist/empty/index",
+      // 空状态
       "van-share-sheet": "wxcomponents/@vant/weapp/dist/share-sheet/index",
-      "van-divider": "wxcomponents/@vant/weapp/dist/divider/index"
+      // 分享面板
+      "van-divider": "wxcomponents/@vant/weapp/dist/divider/index",
+      // 分割线
+      "van-collapse": "wxcomponents/@vant/weapp/dist/collapse/index",
+      "van-collapse-item": "wxcomponents/@vant/weapp/dist/collapse-item/index",
+      // 折叠层
+      "van-row": "wxcomponents/@vant/weapp/dist/row/index",
+      "van-col": "wxcomponents/@vant/weapp/dist/col/index",
+      // layout布局
+      "van-field": "wxcomponents/@vant/weapp/dist/field/index",
+      // 输入框
+      "van-action-sheet": "wxcomponents/@vant/weapp/dist/action-sheet/index",
+      // 动作面板
+      "van-dropdown-menu": "wxcomponents/@vant/weapp/dist/dropdown-menu/index",
+      "van-dropdown-item": "wxcomponents/@vant/weapp/dist/dropdown-item/index"
     }
   },
   "tabBar": {
@@ -87,28 +115,28 @@
     "selectedColor": "#fa8c15",
     "list": [
       {
-        "pagePath":"pages/index/index",
-        "text":"柚动态",
-        "iconPath":"static/tabbar/don.png",
-        "selectedIconPath":"static/tabbar/don_cur.png"
+        "pagePath": "pages/index/index",
+        "text": "柚动态",
+        "iconPath": "static/tabbar/don.png",
+        "selectedIconPath": "static/tabbar/don_cur.png"
       },
       {
-        "pagePath":"pages/neitui/index",
-        "text":"柚内推",
-        "iconPath":"static/tabbar/nei.png",
-        "selectedIconPath":"static/tabbar/nei_cur.png"
+        "pagePath": "pages/neitui/index",
+        "text": "柚内推",
+        "iconPath": "static/tabbar/nei.png",
+        "selectedIconPath": "static/tabbar/nei_cur.png"
       },
       {
-        "pagePath":"pages/help/index",
-        "text":"柚子帮",
-        "iconPath":"static/tabbar/help.png",
-        "selectedIconPath":"static/tabbar/help_cur.png"
+        "pagePath": "pages/help/index",
+        "text": "柚子帮",
+        "iconPath": "static/tabbar/help.png",
+        "selectedIconPath": "static/tabbar/help_cur.png"
       },
       {
-        "pagePath":"pages/me/index",
-        "text":"我的",
-        "iconPath":"static/tabbar/my.png",
-        "selectedIconPath":"static/tabbar/my_cur.png"
+        "pagePath": "pages/me/index",
+        "text": "我的",
+        "iconPath": "static/tabbar/my.png",
+        "selectedIconPath": "static/tabbar/my_cur.png"
       }
     ]
   }

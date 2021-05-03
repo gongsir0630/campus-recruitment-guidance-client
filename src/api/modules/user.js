@@ -26,7 +26,19 @@ function login (code) {
   })
 }
 
+function getProfile () {
+  return http.get('/wx/user/mine')
+}
+
+const getNickNameByOpenIds = openIds => {
+  return http.post('/wx/user/names',{
+    ids:openIds
+  })
+}
+
 export default {
   updateUserInfo,
-  login
+  login,
+  getProfile,
+  getNickNameByOpenIds
 }

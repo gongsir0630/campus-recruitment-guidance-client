@@ -12,7 +12,7 @@
     <view class="notice">
       <h1 class="text-center">柚子帮公告</h1>
       <view class="notice-list">
-        <view v-for="item in notices" :key="item.id" class="notice-item" @tap="showNotice(item)">
+        <view v-for="(item,idx) in showNoticeList" :key="idx" class="notice-item" @tap="showNotice(item)">
           <text class="cuIcon-noticefill text-orange notice-number"></text>
           <text class="notice-content">{{ item.title }}</text>
           <text class="notice-hottag">新</text>
@@ -22,13 +22,16 @@
           <text class="cuIcon-right text-blue"></text>
         </view>
         <!-- vant-weapp 公告弹窗 -->
-        <van-dialog id="van-dialog" />
+        <van-dialog id="van-dialog"/>
       </view>
     </view>
 
     <!-- 动态卡片 -->
     <view class="movecard">
-      <view class="cu-card dynamic" v-for="item in DynamicList" :key="item.id" @tap="toPage('./detail/index?id='+item.id)">
+      <view class="cu-card dynamic"
+            v-for="(item,idx) in showDtList"
+            :key="idx"
+            @tap="toPage(`./detail/index?id=${item.detail.id}`)">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
@@ -45,25 +48,36 @@
                   {{ item.major }}
                 </view>
               </view>
-              <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap.stop="onShare"></view>
+              <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap.stop="onShare(item.detail.id)"></view>
             </view>
           </view>
           <view class="margin-top text-content">
-            {{ item.content }}
+            {{ item.detail.content }}
           </view>
-          <view class="grid flex-sub padding-lr col-1">
+          <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
             <view class="bg-img">
-              <image :src="item.imgUrl"></image>
+              <image :src="item.detail.imgUrl"></image>
             </view>
           </view>
           <view class="movecard-tag  padding">
-            <view v-for="tag in item.topTags" :key="tag.length" class='cu-tag radius text-blue'>{{ '#'+tag }}</view>
+            <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
+                  :key="idx" class='cu-tag radius text-blue'>
+              {{ '#' + tag }}
+            </view>
           </view>
           <view class="movecard-icon text-gray padding">
-            <text class="cuIcon-appreciate">{{ item.likeCount }}</text>
-            <text v-if="item.collection===false" class="cuIcon-favor"></text>
-            <text v-else class="cuIcon-favorfill text-red"></text>
-            <text class="cuIcon-forward">分享</text>
+            <!-- 点赞 -->
+            <text :class="item.isLike ? 'cuIcon-appreciatefill text-red' : 'cuIcon-appreciate'"
+                  @tap.stop="onLike(item.detail.id)">
+              {{ item.likeCount }}
+            </text>
+            <!-- 收藏 -->
+            <text :class="item.collection ? 'cuIcon-favorfill text-red' : 'cuIcon-favor'"
+                  @tap.stop="onCollection(item.detail.id)">
+              {{ item.collection ? '取消收藏' : '收藏' }}
+            </text>
+            <!-- 分享 -->
+            <text class="cuIcon-forwardfill text-red" @tap.stop="onShare(item.detail.id)">分享</text>
           </view>
         </view>
       </view>
@@ -73,7 +87,7 @@
     <view class="msg-publish" @tap="toPage('./publish/index')">
       <view class="msg-content">
         <text class="cuIcon-writefill text-black"></text>
-        <text class="msg-text">发布</text>
+        <text class="msg-teƒxt">发布</text>
       </view>
     </view>
 
@@ -84,53 +98,37 @@
       @select="onSelect"
       @close="onClose"
     />
+    <!-- vant-weapp 轻提示 -->
+    <van-toast id="van-toast"/>
+    <van-dialog id="van-dialog"/>
   </view>
 </template>
 
 <script>
+import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
 import Swiper from '@/components/Swiper';
+import {Share_Options} from '@/constants';
+import {mapState, mapActions, mapMutations} from 'vuex'
 // 引入 vant-weapp-dialog 组件 -> 公告弹窗查看详情
 import Dialog from '../../wxcomponents/@vant/weapp/dist/dialog/dialog';
-let test = {
-  id:1,
-  avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-  nickName: '码之泪殇',
-  jobTitle:'快手 Java 研发线',
-  major:'2017级计算机科学与技术',
-  topTags:['校招指导','工作内推'],
-  likeCount:199,
-  collection:true,
-  content:'这是一条测试动态',
-  imgUrl:'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
-}
+
 export default {
   data() {
     return {
+      // 当前分享面板操作的 itemId
+      shareItemId: 1,
+      curPage: 1,
+      pageSize: 5,
       showShare: false,
-      options: [[
-        { name: '微信', icon: 'wechat', openType: 'share' },
-        { name: '微博', icon: 'weibo' },
-        { name: '复制链接', icon: 'link' },
-        { name: '分享海报', icon: 'poster' },
-        { name: '二维码', icon: 'qrcode' },
-      ],[
-        { name: '收藏', icon: 'link' },
-        { name: '删除', icon: 'poster' },
-        { name: '修改', icon: 'qrcode' },
-      ]],
+      options: [
+        ...Share_Options
+      ],
       // 公告列表
       notices: [{
         id: 1,
         title: '柚子帮正式运营了',
-        content: '柚子帮正式运营了'
-      }, {
-        id: 2,
-        title: '柚子帮正式运营了',
-        content: '柚子帮正式运营了'
-      }, {
-        id: 3,
-        title: '柚子帮正式运营了',
-        content: '柚子帮正式运营了'
+        content: '柚子帮正式运营了',
+        publishTime: '2021年04月29日16:32:08'
       }],
       // 轮播图数据列表
       swiperList: [{
@@ -142,27 +140,147 @@ export default {
         type: 'image',
         url: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
       }],
-      DynamicList: [
-        test,
-        test
-      ],
+      // 分页展示列表
+      dynamicList: [{
+        avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
+        nickName: '码之泪殇',
+        jobTitle: '快手 Java 研发线',
+        major: '2017级计算机科学与技术',
+        isLike: false,
+        likeCount: 199,
+        collection: false,
+        detail: {
+          id: 1,
+          openId: '',
+          content: '这是一条测试动态',
+          imgUrl: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg',
+          topicTags: '',
+          publishTime: '',
+          likeList: '',
+          collectionList: ''
+        }
+      }],
+    }
+  },
+  computed: {
+    ...mapState('user', ['wxUser']),
+    ...mapState('notice', ['notice']),
+    ...mapState('dynamic', ['dynamic']),
+    pageCount() {
+      console.log(this.dynamic)
+      return Math.ceil(this.dynamic.total / this.pageSize)
+    },
+    showDtList () {
+      this.dynamicList = this.dynamic.list.slice(0, this.curPage * this.pageSize)
+      return this.dynamic.list.slice(0, this.curPage * this.pageSize)
+    },
+    showNoticeList () {
+      this.notices = this.notice.list.slice(0, 3)
+      return this.notices
     }
   },
   components: {
     Swiper
   },
-  onLoad() {
-
-  },
   methods: {
+    ...mapActions('notice', ['getNoticeList']),
+    ...mapActions('dynamic', ['getDynamicList']),
+    /**
+     * id 转 idx
+     */
+    id2Idx (id) {
+      let idx = -1
+      for (let dt of this.dynamic.list) {
+        if (dt.detail.id === id) {
+          idx = this.dynamic.list.indexOf(dt)
+          break
+        }
+      }
+      return idx
+    },
+    /**
+     * 点赞
+     */
+    async onLike(id) {
+      // 异步请求
+      await this.$api.dynamic.like(id)
+
+      let idx = this.id2Idx(id)
+      if (this.dynamic.list[idx].isLike) {
+        this.dynamic.list[idx].likeCount--
+      } else {
+        this.dynamic.list[idx].likeCount++
+      }
+      this.dynamic.list[idx].isLike = !this.dynamic.list[idx].isLike
+      // 重新加载数据，刷新点赞列表
+      await this.getDynamicList(null)
+      console.log(this.dynamic.list[idx].detail.likeList)
+    },
+    /**
+     * 收藏
+     */
+    async onCollection(id) {
+      // 异步请求
+      await this.$api.dynamic.collection(id)
+      let idx = this.id2Idx(id)
+      this.dynamic.list[idx].collection ? Toast.success('已取消收藏') : Toast.success('收藏成功')
+      this.dynamic.list[idx].collection = !this.dynamic.list[idx].collection
+    },
+    onDelete(id) {
+      let idx = this.id2Idx(id)
+      Dialog.confirm({
+        title: '动态删除',
+        message: '确认要删除这条动态吗',
+      }).then(() => {
+        // 异步请求
+        this.$api.dynamic.deleteById(id)
+        this.dynamic.list.splice(idx, 1)
+        this.dynamic.total--
+      })
+    },
+    /**
+     * 上拉加载更多
+     */
+    onReachBottom() {
+      if (++this.curPage <= this.pageCount) {
+        uni.showToast({
+          title: '努力为你加载...',
+          icon: 'loading',
+          mask: true
+        })
+        console.log(this.curPage)
+      } else {
+        uni.showToast({
+          title: '没有更多数据了~',
+          icon: 'success'
+        })
+      }
+    },
+    /**
+     * 页面加载
+     */
+    onShow() {
+      // 加载公告
+      this.loadNotice()
+      this.loadDynamic()
+    },
     /**
      * share
-     * @param event
      */
-    onShare(event) {
+    onShare(id) {
       // console.log(event)
       // 暂时隐藏 tabBar
+      let idx = this.id2Idx(id)
+      let openId = this.dynamicList[idx].detail.openId
+      if (openId !== this.wxUser.openId) {
+        // 非本人视角，去掉删除、修改操作
+        this.options = Share_Options.slice(0, 2)
+      } else {
+        this.options = Share_Options
+      }
       uni.hideTabBar()
+      // 当前分享面板操作的动态
+      this.shareItemId = id
       this.showShare = true
     },
     // close share
@@ -175,7 +293,18 @@ export default {
      * @param event
      */
     onSelect(event) {
-      console.log(event.detail.name);
+      let opName = event.detail.name
+      console.log(opName);
+      switch (opName) {
+        case "收藏":
+          this.onCollection(this.shareItemId)
+          break;
+        case "删除":
+          this.onDelete(this.shareItemId)
+          break;
+        case "修改":
+          break;
+      }
       this.onClose();
     },
     /**
@@ -187,36 +316,32 @@ export default {
     /**
      * api加载轮播图
      */
-    getSwiperList() {
+    async getSwiperList() {
+    },
+    /**
+     * 异步加载公告信息,只显示最新三条
+     */
+    async loadNotice() {
+      await this.getNoticeList(null)
+    },
+    /**
+     * 异步加载动态信息
+     */
+    async loadDynamic() {
+      await this.getDynamicList(null)
     },
     /**
      * 公告弹出
      */
     showNotice(notice) {
       // 弹窗显示公告详情
-      // uni.showModal({
-      //   title: notice.title,
-      //   content: notice.content,
-      //   showCancel:false,
-      //   confirmText: '我知道了'
-      // })
       Dialog.alert({
         title: notice.title,
         message: notice.content,
         confirmButtonText: '我知道了'
       })
-    },
-    showBottom(e) {
-      this.bottomName = e.currentTarget.dataset.target;
-    },
-    hideBottom() {
-    },
-    bottomChange() {
     }
   },
-  created() {
-    this.getSwiperList();
-  }
 }
 </script>
 

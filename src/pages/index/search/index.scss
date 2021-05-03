@@ -1,0 +1,46 @@
+.search-view{
+  padding: 10px;
+}
+.search-history,
+.search-tags,
+.search-hot{
+  padding: 10px;
+  margin: 5px 0;
+
+  .history-delete{
+    float: right;
+  }
+
+  .search-box{
+    width:98%;
+    margin-top:5px;
+    display: flex;
+    flex-wrap: wrap;
+    .search-tag{
+      margin:5px;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .close-tag{
+    margin-left:10px;
+  }
+}
+.search-hot{
+  background: #fff;
+  border-radius: 8px;
+
+  .search-hot-list{
+    .search-hot-item{
+      padding: 6px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .search-hot-icon{
+        margin-right: 10px;
+      }
+      .search-hot-text{
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
