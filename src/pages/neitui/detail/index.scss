@@ -1,0 +1,25 @@
+page {
+  background-color: #fff;
+}
+
+.my-moreandroid {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  z-index: 99;
+}
+
+.dian-box {
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  margin-top: 20px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.dian-name {
+  padding: 0 20px;
+  margin-top: 20px;
+}
