@@ -3,12 +3,14 @@
     <!-- 看内推 -->
     <!-- 搜索框 -->
     <view class="cu-bar search bg-white">
-      <view class="search-form round">
+      <view class="search-form round" @tap="toPage('./search/index')">
         <text class="cuIcon-search"></text>
-        <input @focus="toPage('./search/index')" @blur="inputBlur" :adjust-position="false" type="text"
-               placeholder="搜索感兴趣的公司或者职业标签" confirm-type="search"/>
-        <button class="cu-btn bg-orange shadow-blur round">搜索</button>
+        <input :adjust-position="false" type="text"
+               placeholder="搜索关键字或者职位标签" confirm-type="search"/>
       </view>
+      <button class="cu-btn bg-orange shadow-blur round margin-right" @tap="toPage('./subscribe/index')">
+        订阅
+      </button>
     </view>
     <!-- 轮播图 -->
     <view class="banner">
@@ -28,30 +30,40 @@
     </view>
 
     <view>
-      <view class="cu-card dynamic"
-            v-for="(item,idx) in neiCardList"
+      <view v-for="(item,idx) in barText === '推荐' ? neiCardList : neiCardList.filter(nt=>{
+        return myTagList.some(tag=>{
+          return nt.positionTags.match(tag)
+          || nt.details.match(tag)
+          || nt.user.jobInfo.company.name.match(tag)
+        })
+      })"
             :key="idx"
-            @tap="toPage(`./detail/index/idx=${idx}`)">
+            class="cu-card dynamic"
+            @tap="toPage(`./detail/index?id=${item.id}`)">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
               <view class="cu-avatar round lg">
-                <image class="cu-avatar lg round" :src="item.avatar"/>
+                <image class="cu-avatar lg round" :src="item.user.jobInfo.company.logo"/>
               </view>
               <view class="content flex-sub">
-                <view class="flex align-center">
-                  <text class="text-orange text-lg">{{ item.companyName }}</text>
-                  <text class='cu-tag text-white bg-blue light radius good-tag margin-left-xs'>{{ item.type }}</text>
+                <view class="flex align-center justify-between">
+                  <text class="text-orange text-lg">{{ item.user.jobInfo.company.name }}</text>
+                  <text class='cu-tag text-white bg-blue light radius good-tag margin-left-xs'>{{ item.form }}</text>
                 </view>
                 <!-- 发布人信息 -->
                 <text class="text-sm">
-                  {{ item.nickName }}
+                  {{ item.user.eduInfo.major + item.user.eduInfo.entrance + '级' + item.user.realName + '同学' }}
                 </text>
               </view>
             </view>
           </view>
           <view class="movecard-tag padding">
-            <view v-for="(tag,tid) in item.fieldTags"
+            <!-- 内容 -->
+            <view class="text-content margin-bottom">
+              {{ item.details.slice(0, 30) }}
+            </view>
+            <view v-for="(tag,tid) in (item.positionTags || '').split(',').filter(t => t!=='')"
                   :key="tid"
                   class='cu-tag text-orange bg-orange light radius good-tag'>
               {{ tag }}
@@ -73,17 +85,16 @@
 <script>
 
 import Swiper from '@/components/Swiper'
+import {mapActions, mapState} from "vuex";
 
 export default {
   components: {
     Swiper
   },
-  data() {
-    return {
-      typename: '看内推',
-      barText: '推荐',
-      // 轮播图数据列表
-      swiperList: [{
+  props: {
+    swiperList: {
+      type: Array,
+      default: [{
         id: 2,
         type: 'image',
         url: 'https://cdn.gongsir.club/blog/image/2021/04/22tieba.jpg'
@@ -92,41 +103,104 @@ export default {
         type: 'image',
         url: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg'
       }],
-      neiCardList: [
-        {
-          id: 1,
-          avatar: 'https://cdn.gongsir.club/blog/image/2021/04/24ks.jpg',
-          nickName: '2017级算计科学与技术专业学长',
-          companyName: '北京快手科技有限公司',
-          fieldTags: ['Java 后端', '前端开发', '产品经理'],
-          type: '校招'
-        },
-        {
-          id: 1,
-          avatar: 'https://cdn.gongsir.club/blog/image/2021/04/24ks.jpg',
-          nickName: '码之泪殇',
-          companyName: '北京快手科技有限公司',
-          fieldTags: ['Java 后端', '前端开发', '产品经理'],
-          type: '校招'
-        },
-        {
-          id: 1,
-          avatar: 'https://cdn.gongsir.club/blog/image/2021/04/24ks.jpg',
-          nickName: '码之泪殇',
-          companyName: '北京快手科技有限公司',
-          fieldTags: ['Java 后端', '前端开发', '产品经理'],
-          type: '实习/校招'
-        },
-      ]
+    },
+    neiCardList: {
+      type: Array,
+      default: [{
+        details: '快手实习',
+        form: '实习',
+        id: 1,
+        openId: 'olAW-4vIdX8DTkzftHveDWIlR4zU',
+        positionTags: '前端开发',
+        publishTime: '2021-05-03',
+        imgUrl: '',
+        user: {
+          openId: 'visitor',
+          avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
+          nickName: '游客',
+          gender: '男',
+          realName: '游客',
+          phoneNumber: '',
+          email: '',
+          eduId: 0,
+          jobId: 0,
+          profile: '',
+          eduInfo: {
+            id: 0,
+            schoolId: 1,
+            major: '',
+            entrance: '',
+            graduate: '',
+            level: '',
+            description: '',
+            status: '',
+            school: {
+              id: 1,
+              logo: '',
+              name: '',
+              majorList: '',
+              mailSuffix: ''
+            }
+          },
+          jobInfo: {
+            id: 0,
+            openId: '',
+            companyId: 1,
+            department: '',
+            jobTitle: '',
+            description: '',
+            status: '',
+            company: {
+              id: 1,
+              logo: '',
+              name: '',
+              slogan: '',
+              mailSuffix: ''
+            }
+          }
+        }
+      }]
     }
   },
+  data() {
+    return {
+      typename: '看内推',
+      barText: '推荐',
+      myTagList: ['腾讯'],
+      allTagList:null
+    }
+  },
+  computed: {
+    ...mapState('history',['history']),
+  },
   methods: {
-    inputBlur () {
+    ...mapActions('history',['getMyAllHistory']),
+    async loadAllTagList () {
+      const {data} = await this.$api.tags.getTagsByType(1)
+      this.allTagList = data
+    },
+    getTagNameById (id) {
+      for (const tag of this.allTagList) {
+        if (tag.id === id ) return tag.tagName
+      }
+    },
+    async loadAllHistory () {
+      await this.loadAllTagList()
+      // 加载搜索历史
+      await this.getMyAllHistory(null)
+      let tagIds = this.history.subscribe?.split(',').map(Number)
+      // 清空数组
+      this.myTagList.splice(0)
+      tagIds.forEach(id => {
+        this.myTagList.push(this.getTagNameById(+id))
+      })
+      console.log(this.myTagList)
     },
     toPage(url) {
       uni.navigateTo({url})
     },
     changeType() {
+      this.loadAllHistory()
       if (this.barText === '推荐') {
         this.barText = '最新';
         //todo: 刷新数据

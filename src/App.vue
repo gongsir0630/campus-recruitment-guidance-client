@@ -2,14 +2,8 @@
 import {mapActions, mapState} from "vuex";
 
 export default {
-  data () {
-    return {
-      token: uni.getStorageSync('token'),
-      isLogin: false,
-    }
-  },
   computed: {
-    ...mapState('user', ['wxUser']),
+    ...mapState('user', ['wxUser','isLogin','token']),
   },
   methods: {
     ...mapActions('user', ['setLoginStatus', 'setUserInfo']),
@@ -28,6 +22,7 @@ export default {
       await this.getEduInfoById(this.wxUser.eduId)
       // jobInfo
       await this.getJobInfoById(this.wxUser.jobId)
+      // 设置登录状态
       this.setLoginStatus(true)
       console.log("login success, 欢迎你: "+this.wxUser.nickName)
       console.log(this.wxUser)
@@ -39,6 +34,7 @@ export default {
   onShow: function () {
     console.log('App Show')
     // token有效则自动登录
+    console.log("token:"+this.token)
     if (this.token && !this.isLogin) {
       this.autoLogin()
     }

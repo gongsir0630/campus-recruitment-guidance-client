@@ -1,3 +1,4 @@
+import store from '@/store/index'
 const state = {
   token: uni.getStorageSync('token'),
   isLogin: false,
@@ -5,13 +6,47 @@ const state = {
     openId: 'visitor',
     avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
     nickName: '游客',
-    gender: 1,
+    gender: '男',
     realName:'游客',
     phoneNumber:'',
     email:'',
-    eduId: 1,
-    jobId: 1,
-    profile:''
+    eduId: 0,
+    jobId: 0,
+    profile:'',
+    eduInfo:{
+      id: 0,
+      openId:'',
+      schoolId:1,
+      major:'',
+      entrance:'',
+      graduate:'',
+      level:'',
+      description:'',
+      status:'',
+      school: {
+        id:1,
+        logo:'',
+        name:'',
+        majorList:'',
+        mailSuffix:''
+      }
+    },
+    jobInfo:{
+      id: 0,
+      openId:'',
+      companyId:1,
+      department:'',
+      jobTitle:'',
+      description:'',
+      status:'',
+      company: {
+        id:1,
+        logo:'',
+        name:'',
+        slogan:'',
+        mailSuffix:''
+      }
+    }
   }
 }
 
@@ -19,31 +54,34 @@ const mutations = {
   setToken (state, payload) {
     state.token = payload
     uni.setStorageSync('token',payload)
-    state.isLogin = true
   },
   setLoginStatus (state, payload) {
     state.isLogin = payload
   },
   clearToken (state) {
     state.token = ''
-    state.toLogin = true
+    state.isLogin = false
   },
   setUserInfo (state, payload) {
-    const { openId, avatar, gender, nickName, realName, phoneNumber, email, eduId, jobId, profile } = payload
-    state.wxUser.openId = openId
-    state.wxUser.avatar = avatar
-    state.wxUser.nickName = nickName
-    state.wxUser.gender = gender
-    state.wxUser.realName = realName
-    state.wxUser.phoneNumber = phoneNumber
-    state.wxUser.email = email
-    state.wxUser.eduId = eduId
-    state.wxUser.jobId = jobId
-    state.wxUser.profile = profile
+    if (payload) {
+      state.wxUser = payload
+      store.commit('edu/setEduInfo',payload.eduInfo)
+      store.commit('job/setJobInfo',payload.jobInfo)
+    }
+  },
+  setWxUserInfo (state,payload) {
+    if (payload) {
+      state.wxUser.avatar = payload.avatar
+      state.wxUser.nickName = payload.nickName
+      state.wxUser.gender = payload.gender
+    }
   }
 }
 
 const actions = {
+  setWxUserInfo (context, payload) {
+    context.commit('setWxUserInfo',payload)
+  },
   setUserInfo (context, payload) {
     context.commit('setUserInfo', payload)
   },

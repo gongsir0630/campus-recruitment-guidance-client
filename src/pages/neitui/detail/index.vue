@@ -1,247 +1,125 @@
 <template>
-  <view>
+  <view v-if="item">
     <cu-custom bgColor="#fa8c15" isBack="true">
       <block slot="back">返回</block>
-      <block slot="right">动态详情</block>
+      <block slot="right">内推详情</block>
     </cu-custom>
-    <!-- 动态详情 -->
-    <view>
-      <view class="cu-card dynamic no-card">
-        <view class="cu-item shadow">
-          <!-- 用户信息 -->
-          <view class="cu-list menu-avatar">
-            <view class="cu-item">
-              <!-- 头像 -->
-              <view class="cu-avatar round lg">
-                <image class="cu-avatar lg round" :src="item.avatar"/>
-              </view>
-              <view class="content flex-sub">
-                <view class="text-orange">{{ item.nickName }}</view>
-                <view v-if="item.jobTitle!=='未认证职业信息'" class="text-gray text-sm flex justify-between">
-                  {{ item.jobTitle }}
-                </view>
-                <view v-else class="text-gray text-sm flex justify-between">
-                  {{ item.major }}
-                </view>
-              </view>
-              <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap="onShare"></view>
+    <!-- 内推详情 -->
+    <!-- 公司 logo 头像 -->
+    <view class="topbg margin-bottom">
+      <view class="cu-avatar my-avatar">
+        <image class="cu-avatar lg round" :src="item.user.jobInfo.company.logo"/>
+      </view>
+    </view>
+    <!-- 详情 -->
+    <view class="zhidetail">
+      <view class="content">
+        <view class="flex align-center">
+          <view class="text-xxl">
+            <view class="action">
+              <text class="cuIcon-titles text-orange"></text>公司信息
             </view>
           </view>
-          <!-- 内容 -->
-          <view class="margin-top text-content">
-            {{ item.detail.content }}
-          </view>
-          <!-- 图片 -->
-          <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
-            <image :src="item.detail.imgUrl"></image>
-          </view>
-          <view class="movecard-tag  padding">
-            <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
-                  :key="idx" class='cu-tag radius text-blue'>
-              {{ '#' + tag }}
-            </view>
-          </view>
-          <!-- 互动功能 -->
-          <van-divider contentPosition="center">
-            <text class="text-orange">点个赞吧</text>
-          </van-divider>
-          <!-- 点赞名单 -->
-          <view class="dian-name" @tap="toPage('/like/index')">
-            <text v-if="item.isLike || allLikeList.length>0" class="cuIcon-appreciatefill text-blue"></text>
-            <text class="text-content">
-              <text v-if="item.isLike" class="text-orange">
-                {{ wxUser.nickName + (allLikeList.length > 0 ? ', ' : '') }}
-              </text>
-              <text class="text-blue">
-                {{ nickNameList }}
-              </text>
-            </text>
-          </view>
-          <view class="dian-box">
-            <button class="cu-btn line-gray round"
-                    @tap="onLike">
-              <text class="cuIcon-appreciate" :class="item.isLike?'text-orange':'text-gray'">&nbsp;点赞</text>
-            </button>
-            <button class="cu-btn line-gray round"
-                    @tap="onShare">
-              <text class="cuIcon-share text-gray">分享</text>
-            </button>
-            <button class="cu-btn line-gray round" @tap="onCollection">
-              <text class="cuIcon-favor" :class="item.collection?'text-orange':'text-gray'">收藏</text>
-            </button>
-          </view>
+        </view>
+        <!-- 公司信息 -->
+        <view class="text-lg margin-top margin-left flex flex-direction">
+          <view class="text-orange text-lg">{{ item.user.jobInfo.company.name }}</view>
+          <view class="text-black text-lg margin-top">{{ `『${item.user.jobInfo.company.slogan}』` }}</view>
+        </view>
 
-          <!-- vant-weapp 分享面板 -->
-          <van-share-sheet
-            :show="showShare"
-            title="立即分享给好友"
-            :options="options"
-            @select="onSelect"
-            @close="onClose"
-          />
+        <!-- 标签 -->
+        <view class="margin-top text-lg margin-left">
+          <text class='cu-tag text-white bg-blue light radius good-tag margin-left-xs'>{{ item.form }}</text>
+          <view v-for="(tag,tid) in (item.positionTags || '').split(',').filter(t => t!=='')"
+                :key="tid"
+                class='cu-tag text-orange bg-orange light radius good-tag'>
+            {{ tag }}
+          </view>
+        </view>
+
+        <view class="flex align-center margin-top">
+          <view class="text-xxl">
+            <view class="action">
+              <text class="cuIcon-titles text-orange"></text>内推人
+            </view>
+          </view>
+        </view>
+        <!-- 用户信息 -->
+        <view class="text-lg margin-top margin-left flex align-center">
+          <!-- 头像 -->
+          <view class="cu-avatar round lg">
+            <image class="cu-avatar lg round" :src="item.user.avatar"/>
+          </view>
+          <view class="content flex-sub margin-left">
+            <view class="text-orange text-lg">{{ item.user.nickName+'-'+item.user.realName }}</view>
+            <view class="text-black text-lg margin-top">{{ item.user.eduInfo.major+item.user.eduInfo.entrance+'级' }}</view>
+            <view class="text-black text-lg margin-top">{{ item.user.jobInfo.jobTitle }}</view>
+          </view>
+        </view>
+
+        <!-- 内推详情 -->
+        <view class="margin-top">
+          <view class="text-xxl">
+            <view class="action">
+              <text class="cuIcon-titles text-orange"></text>内推详情
+            </view>
+          </view>
+          <view class="text-content margin-left margin-top">
+            <!-- 内容 -->
+            <view class="margin-top text-content">
+              {{ item.details }}
+            </view>
+            <!-- 图片 -->
+            <view v-if="item.imgUrl" class="bg-img">
+              <image :src="item.imgUrl" mode="aspectFit" @tap.stop="viewImg(item.imgUrl)"></image>
+            </view>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- vant-weapp 轻提示 -->
-    <van-toast id="van-toast"/>
-    <van-dialog id="van-dialog"/>
+    <!-- 分享 -->
+    <view class="padding flex align-center justify-center">
+      <button class="cu-btn bg-orange round lg margin-left" open-type="share">分享</button>
+    </view>
   </view>
 </template>
 
 <script>
-import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
-// 引入 vant-weapp-dialog 组件 -> 公告弹窗查看详情
-import Dialog from '@/wxcomponents/@vant/weapp/dist/dialog/dialog';
-import {Share_Options} from '@/constants'
-import {mapState} from 'vuex';
+import {mapState} from "vuex";
 
 export default {
   data() {
     return {
-      allLikeList: ['test1', 'test2', '🍄', 'helloTest'],
-      nickNameList: 'test1, test2',
-      showShare: false,
-      options: [...Share_Options],
-      item: {
-        avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
-        nickName: '码之泪殇',
-        jobTitle: '快手 Java 研发线',
-        major: '2017级计算机科学与技术',
-        isLike: false,
-        likeCount: 199,
-        collection: false,
-        detail: {
-          id: 1,
-          openId: '',
-          content: '这是一条测试动态',
-          imgUrl: 'https://cdn.gongsir.club/blog/image/2021/04/221.jpg',
-          topicTags: '',
-          publishTime: '',
-          likeList: '',
-          collectionList: ''
-        }
-      },
+      item: {},
     }
   },
   computed: {
-    ...mapState('user', ['wxUser']),
-    ...mapState('dynamic', ['dynamic']),
+    ...mapState('nt',['nt']),
+    ...mapState('user',['wxUser']),
   },
   methods: {
-    /**
-     * id 转 idx
-     */
-    id2Idx (id) {
-      let idx = -1
-      for (let dt of this.dynamic.list) {
-        if (dt.detail.id === id) {
-          idx = this.dynamic.list.indexOf(dt)
-          break
-        }
-      }
-      return idx
+    viewImg(imgUrl) {
+      uni.previewImage({
+        urls: [imgUrl],
+        current: imgUrl
+      });
     },
     /**
-     * share
-     */
-    onShare() {
-      let openId = this.item.detail.openId
-      if (openId !== this.wxUser.openId) {
-        // 非本人视角，去掉删除、修改操作
-        this.options = Share_Options.slice(0, 2)
-      } else {
-        this.options = Share_Options
-      }
-      this.showShare = true
-    },
-    // close share
-    onClose() {
-      this.showShare = false
-    },
-    /**
-     * share item
-     * @param event
-     */
-    onSelect(event) {
-      let opName = event.detail.name
-      console.log(opName);
-      switch (opName) {
-        case "收藏":
-          this.onCollection()
-          break;
-        case "删除":
-          this.onDelete()
-          break;
-        case "修改":
-          break;
-      }
-      this.onClose();
-    },
-    async onLike() {
-      // TODO: 异步请求
-      await this.$api.dynamic.like(this.item.detail.id)
-      if (this.item.isLike) {
-        this.item.likeCount--
-      } else {
-        this.item.likeCount++
-      }
-      this.item.isLike = !this.item.isLike
-    },
-    async onCollection() {
-      // TODO: 异步请求
-      await this.$api.dynamic.collection(this.item.detail.id)
-      this.item.collection ? Toast.success('已取消收藏') : Toast.success('收藏成功')
-      this.item.collection = !this.item.collection
-    },
-    onDelete() {
-      Dialog.confirm({
-        title: '动态删除',
-        message: '确认要删除这条动态吗',
-      }).then(() => {
-        // 异步请求
-        this.$api.dynamic.deleteById(this.item.detail.id)
-        this.dynamic.list.splice(this.id2Idx(this.item.detail.id), 1)
-        this.dynamic.total--
-        // 返回首页
-        uni.navigateBack({
-          delta:1
-        })
-      })
-    },
-    /**
-     * page-router
-     * @param url page-url
-     */
-    toPage(url) {
-      uni.navigateTo({url})
-    },
-    /**
-     * 根据动态 id 渲染动态详情
+     * 页面加载监听
      * @param id
      */
     onLoad ({id}) {
       // 类型转换，坑
       id = +id
-      for (let dt of this.dynamic.list) {
-        if (dt.detail.id === id)
-          this.item = dt
+      console.log("查看内推详情: "+id)
+      for (let t of this.nt.list) {
+        if (t.id === id)
+          this.item = t
       }
-      let likeList = this.item.detail.likeList
-      this.allLikeList = (likeList || '').split(",").filter(openId => openId !== '')
-      if (this.item.isLike) {
-        // 把自己从点赞列表删除
-        this.allLikeList.splice(this.allLikeList.indexOf(this.wxUser.openId), 1)
-      }
-      console.log(this.allLikeList)
-      this.showLikeList2Name()
-    },
-    async showLikeList2Name () {
-      const {data} = await this.$api.user.getNickNameByOpenIds(this.allLikeList.join(","))
-      console.log(data)
-      this.nickNameList = data.slice(0, Math.min(10, data.length)).join(", ")
-    },
-  },
+      console.log(this.item)
+    }
+  }
 }
 </script>
 

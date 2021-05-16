@@ -33,7 +33,7 @@
           </view>
           <!-- 图片 -->
           <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
-            <image :src="item.detail.imgUrl"></image>
+            <image :src="item.detail.imgUrl" mode="aspectFit" @tap="viewImg(item.detail.imgUrl)"></image>
           </view>
           <view class="movecard-tag  padding">
             <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
@@ -129,6 +129,12 @@ export default {
     ...mapState('dynamic', ['dynamic']),
   },
   methods: {
+    viewImg(imgUrl) {
+      uni.previewImage({
+        urls: [imgUrl],
+        current: imgUrl
+      });
+    },
     /**
      * id 转 idx
      */
@@ -148,7 +154,7 @@ export default {
     onShare() {
       let openId = this.item.detail.openId
       if (openId !== this.wxUser.openId) {
-        // 非本人视角，去掉删除、修改操作
+        // 非本人视角，去掉删除操作
         this.options = Share_Options.slice(0, 2)
       } else {
         this.options = Share_Options
@@ -167,13 +173,14 @@ export default {
       let opName = event.detail.name
       console.log(opName);
       switch (opName) {
-        case "收藏":
-          this.onCollection()
+        case "复制链接":
+          uni.showToast({
+            title:'链接复制成功',
+            icon:'success'
+          })
           break;
         case "删除":
           this.onDelete()
-          break;
-        case "修改":
           break;
       }
       this.onClose();

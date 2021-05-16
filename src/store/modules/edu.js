@@ -4,13 +4,21 @@ import api from '@/api/index'
 const state = {
   eduInfo:{
     id: 0,
+    openId:'',
     schoolId:1,
     major:'',
-    entrance:'',
-    graduate:'',
+    entrance:2017,
+    graduate:2021,
     level:'',
     description:'',
-    status:''
+    status:'',
+    school: {
+      id:1,
+      logo:'',
+      name:'',
+      majorList:'',
+      mailSuffix:''
+    }
   }
 }
 
@@ -20,15 +28,9 @@ const getters = {
 
 const mutations = {
   setEduInfo (state, payload) {
-    state.eduInfo = payload
-    // state.id = payload.id
-    // state.schoolId = payload.schoolId
-    // state.major = payload.major
-    // state.entry = payload.entrance
-    // state.graduate = payload.graduate
-    // state.level = payload.level
-    // state.description = payload.description
-    // state.status = payload.status
+    if (payload) {
+      state.eduInfo = payload
+    }
   }
 }
 

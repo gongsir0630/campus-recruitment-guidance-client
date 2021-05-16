@@ -6,14 +6,10 @@ export function ChooseImage(that) {
     count: 1, //默认9
     sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
     sourceType: ['album'], //从相册选择
-    success: (res) => {
-      if (that.imgList.length !== 0) {
-        that.imgList = that.imgList.concat(res.tempFilePaths)
-      } else {
-        that.imgList = res.tempFilePaths
-      }
+    success: async (res) => {
+      that.imgList = res.tempFilePaths
       // 上传到服务器
-      uni.uploadFile({
+      await uni.uploadFile({
         url: 'https://yzhelp.top/public/upload', //仅为示例，非真实的接口地址
         filePath: that.imgList[0],
         name: 'file',

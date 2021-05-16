@@ -6,9 +6,11 @@
 
     <!-- 内推卡片 -->
     <!-- 看内推 -->
-    <KanNeitui v-if="neiType"></KanNeitui>
+    <KanNeitui v-if="neiType"
+               :neiCardList="showRecommendationList">
+    </KanNeitui>
     <!-- 发内推 -->
-    <FaNeitui v-if="!neiType"></FaNeitui>
+    <FaNeitui v-if="!neiType" :allTagList="showAllTags"></FaNeitui>
   </view>
 </template>
 
@@ -16,6 +18,7 @@
 
 import KanNeitui from '@/pages/neitui/KanNeitui';
 import FaNeitui from '@/pages/neitui/FaNeitui';
+import {mapActions, mapState} from "vuex";
 
 export default {
   components: {
@@ -25,10 +28,51 @@ export default {
   data() {
     return {
       typename: '发内推',
-      neiType: true
+      neiType: true,
+      allTagList:[]
+    }
+  },
+  computed: {
+    ...mapState('user',['wxUser']),
+    ...mapState('nt',['nt']),
+    /**
+     * 计算属性处理显示数据
+     */
+    showRecommendationList () {
+      return this.nt.list
+    },
+    showAllTags () {
+      return this.allTagList
     }
   },
   methods: {
+    ...mapActions('nt',['getRecommendationList']),
+    /**
+     * 页面显示事件监听
+     */
+    onShow () {
+      this.loadRecommendations()
+      this.loadAllTagList()
+      console.log(this.nt)
+    },
+    /**
+     *  加载职位标签
+     */
+    async loadAllTagList() {
+      // type = 1 表示加载职位标签
+      const {data} = await this.$api.tags.getTagsByType(1)
+      this.allTagList = data
+    },
+    /**
+     * 异步加载内推数据
+     * @returns {Promise<void>}
+     */
+    async loadRecommendations () {
+      await this.getRecommendationList(0)
+    },
+    /**
+     * 顶部切换事件
+     */
     changType() {
       if (this.typename === '发内推') {
         this.neiType = false;
@@ -37,6 +81,9 @@ export default {
         this.neiType = true;
         this.typename = '发内推';
       }
+      // 刷新数据
+      this.loadRecommendations()
+      this.loadAllTagList()
     }
   }
 }

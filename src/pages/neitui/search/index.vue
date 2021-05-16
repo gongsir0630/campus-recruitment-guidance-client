@@ -4,7 +4,7 @@
     <!-- 顶部 -->
     <cu-custom bgColor="#fa8c15" isBack="true">
       <block slot="back">返回</block>
-      <block slot="right">搜索柚动态</block>
+      <block slot="right">搜索内推</block>
     </cu-custom>
     <!-- 搜索框 -->
     <view class="cu-bar bg-white search">
@@ -12,7 +12,7 @@
         <text class="cuIcon-search"></text>
         <input @focus="inputFocus" @blur="inputBlur"
                :adjust-position="false" type="text"
-               placeholder="搜索关键字或话题标签"
+               placeholder="搜索关键字或者职位标签"
                confirm-type="search"
                v-model="keywords"/>
       </view>
@@ -41,7 +41,7 @@
         </view>
         <!-- 推荐标签 -->
         <view class="search-tags">
-          <h1>推荐标签</h1>
+          <h1>职位标签</h1>
           <view class="search-box">
             <view class='cu-tag radius bg-white search-tag'
                   v-for="(item,idx) in tagList" :key="idx" @tap.stop="onSearch(item.tagName)">
@@ -50,73 +50,48 @@
           </view>
         </view>
 
-        <!-- 热门搜索 -->
-        <view class="search-hot">
-          <h1>热门搜索
-            <text class="cuIcon-hot text-red text-shadow"></text>
-          </h1>
-          <view class="search-hot-list">
-            <view class="search-hot-item"
-                  v-for="(item,idx) in hotList" :key="idx" @tap.stop="onSearch(item.name)">
-              <text class="search-hot-icon cuIcon-emoji text-red"></text>
-              <text class="search-hot-text">{{ item.name }}</text>
-            </view>
-          </view>
-        </view>
-
       </view>
     </template>
     <template v-else>
-      <!-- 动态卡片 -->
-      <view v-if="dynamicList.length>0" class="movecard">
+      <view v-if="neiCardList.length>0">
         <view class="cu-card dynamic"
-              v-for="(item,idx) in dynamicList"
+              v-for="(item,idx) in neiCardList"
               :key="idx"
-              @tap="toPage(`../detail/index?id=${item.detail.id}`)">
+              @tap="toDetail(`./detail/index?id=${item.id}`)">
           <view class="cu-item shadow">
             <view class="cu-list menu-avatar">
               <view class="cu-item">
-                <!-- 头像 -->
                 <view class="cu-avatar round lg">
-                  <image class="cu-avatar lg round" :src="item.avatar"/>
+                  <image class="cu-avatar lg round" :src="item.user.jobInfo.company.logo"/>
                 </view>
                 <view class="content flex-sub">
-                  <view class="text-orange">{{ item.nickName }}</view>
-                  <view v-if="item.jobTitle!=='未认证职业信息'" class="text-gray text-sm flex justify-between">
-                    {{ item.jobTitle }}
+                  <view class="flex align-center justify-between">
+                    <text class="text-orange text-lg">{{ item.user.jobInfo.company.name }}</text>
+                    <text class='cu-tag text-white bg-blue light radius good-tag margin-left-xs'>{{ item.form }}</text>
                   </view>
-                  <view v-else class="text-gray text-sm flex justify-between">
-                    {{ item.major }}
-                  </view>
+                  <!-- 发布人信息 -->
+                  <text class="text-sm">
+                    {{ item.user.eduInfo.major+item.user.eduInfo.entrance+'级'+item.user.realName+'同学' }}
+                  </text>
                 </view>
-                <view class="my-moreandroid cuIcon-moreandroid text-gray"></view>
               </view>
             </view>
-            <view class="margin-top text-content">
-              {{ item.detail.content }}
-            </view>
-            <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
-              <view class="bg-img">
-                <image :src="item.detail.imgUrl" mode="aspectFit"></image>
+            <view class="movecard-tag padding">
+              <!-- 内容 -->
+              <view class="text-content margin-bottom">
+                {{ item.details.slice(0,30) }}
+              </view>
+              <view v-for="(tag,tid) in (item.positionTags || '').split(',').filter(t => t!=='')"
+                    :key="tid"
+                    class='cu-tag text-orange bg-orange light radius good-tag'>
+                {{ tag }}
               </view>
             </view>
-            <view class="movecard-tag  padding">
-              <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
-                    :key="idx" class='cu-tag radius text-blue'>
-                {{ '#' + tag }}
-              </view>
-            </view>
-            <view class="movecard-icon text-gray padding">
-              <!-- 点赞 -->
-              <text :class="item.isLike ? 'cuIcon-appreciatefill text-red' : 'cuIcon-appreciate'">
-                {{ item.likeCount }}
-              </text>
-              <!-- 收藏 -->
-              <text :class="item.collection ? 'cuIcon-favorfill text-red' : 'cuIcon-favor'">
-                {{ item.collection ? '取消收藏' : '收藏' }}
-              </text>
-              <!-- 分享 -->
-              <text class="cuIcon-forwardfill text-red">分享</text>
+            <view v-for="(topic,pid) in item.topics"
+                  :key="pid"
+                  class="text-content">
+              <text class="text-white bg-orange text-sm my-tag">#</text>
+              <text>{{ topic }}</text>
             </view>
           </view>
         </view>
@@ -139,48 +114,37 @@ export default {
           tagName: '标签标签标签标签标签标签标签'
         }
       ],
-      historyList: ['柚子帮'],
-      hotList: [
-        {id: 1, name: '热门搜索1'},
-        {id: 2, name: '热门搜索2'},
-        {id: 3, name: '热门搜索3'},
-        {id: 4, name: '热门搜索4'},
-        {id: 5, name: '热门搜索5'}
-      ],
-      keywords:'',
-      dynamicList:[],
+      historyList: [],
+      keywords: '',
+      neiCardList: [],
     }
   },
   computed: {
-    ...mapState('dynamic',['dynamic']),
+    ...mapState('nt', ['nt']),
     ...mapState('history',['history'])
   },
   methods: {
     ...mapActions('history',['getMyAllHistory']),
-    onLoad ({tag}) {
-      if (tag) {
-        this.keywords = tag
-        this.onSearch(tag)
-      }
+    onShow () {
       this.loadAllTagList()
       this.loadAllHistory()
+    },
+    async loadAllTagList () {
+      const {data} = await this.$api.tags.getTagsByType(1)
+      this.tagList = data
     },
     /**
      * 异步提交搜索历史
      */
     onSaveHistory () {
-      const key = 'index'
+      const key = 'nt'
       let val = this.historyList.join(',')
       this.$api.history.saveHistory(key,val)
     },
     async loadAllHistory () {
       // 加载搜索历史
       await this.getMyAllHistory(null)
-      this.historyList = this.history.record?.indexRec?.split(',') ?? this.historyList
-    },
-    async loadAllTagList () {
-      const {data} = await this.$api.tags.getTagsByType(0)
-      this.tagList = data
+      this.historyList = this.history.record?.ntRec?.split(',') ?? this.historyList
     },
     delHistory (idx) {
       this.historyList.splice(idx,1)
@@ -192,7 +156,7 @@ export default {
       // TODO: 异步删除
       this.onSaveHistory()
     },
-    onSearch (val) {
+    onSearch(val) {
       if (val.length>0) {
         // 记录搜索历史, 去重
         if (!this.historyList.includes(val)) {
@@ -201,18 +165,17 @@ export default {
         }
         this.keywords = val
         this.showSearchPage = false
-        this.dynamicList = this.keywords !== ''
-          ? this.dynamic.list.filter(dt =>
-            dt.detail.content.match(this.keywords)
-            || dt.detail.topicTags.match(this.keywords)) : []
+        this.neiCardList = this.keywords !== '' ? this.nt.list.filter(
+          m => m.details.match(this.keywords)
+            || m.positionTags.match(this.keywords)) : []
       }
     },
     /**
-     * page-router
-     * @param url page-url
+     * 详情
+     * @param id
      */
-    toPage (url) {
-      uni.navigateTo({url})
+    toDetail(id) {
+      uni.navigateTo({url: `../detail/index?id=${id}`})
     },
     inputFocus() {
       console.log('focus');

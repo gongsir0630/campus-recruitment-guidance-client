@@ -6,70 +6,61 @@
       <block slot="right">{{ pageTitle }}</block>
     </cu-custom>
 
-    <!-- 动态卡片 -->
+    <!-- 内推卡片 -->
     <view v-if="ids.length>0" class="movecard">
       <view class="cu-card dynamic"
-            v-for="(id,idx) in ids"
+            v-for="(id,idx) in showIds"
             :key="idx"
-            @tap="toPage(`../../../index/detail/index?id=${id}`)">
+            @tap="toPage(`../../../neitui/detail/index?id=${id}`)">
         <view class="cu-item shadow">
           <view class="cu-list menu-avatar">
             <view class="cu-item">
-              <!-- 头像 -->
               <view class="cu-avatar round lg">
-                <image class="cu-avatar lg round" :src="dynamic.list[id2Idx(id)].avatar"/>
+                <image class="cu-avatar lg round" :src="nt.list[id2Idx(id)].user.jobInfo.company.logo"/>
               </view>
               <view class="content flex-sub">
-                <view class="text-orange">{{ dynamic.list[id2Idx(id)].nickName }}</view>
-                <view v-if="dynamic.list[id2Idx(id)].jobTitle!=='未认证职业信息'"
-                      class="text-gray text-sm flex justify-between">
-                  {{ dynamic.list[id2Idx(id)].jobTitle }}
+                <view class="flex align-center justify-between">
+                  <text class="text-orange text-lg">{{ nt.list[id2Idx(id)].user.jobInfo.company.name }}</text>
+                  <text class='cu-tag text-white bg-blue light radius good-tag margin-left-xs'>{{ nt.list[id2Idx(id)].form }}</text>
+                  <text class="cuIcon-close text-red" @tap.stop="delById(id)"></text>
                 </view>
-                <view v-else class="text-gray text-sm flex justify-between">
-                  {{ dynamic.list[id2Idx(id)].major }}
-                </view>
+                <!-- 发布人信息 -->
+                <text class="text-sm">
+                  {{ nt.list[id2Idx(id)].user.eduInfo.major+nt.list[id2Idx(id)].user.eduInfo.entrance+'级'+nt.list[id2Idx(id)].user.realName+'同学' }}
+                </text>
               </view>
-              <view class="my-moreandroid cuIcon-moreandroid text-gray"></view>
             </view>
           </view>
-          <view class="margin-top text-content">
-            {{ dynamic.list[id2Idx(id)].detail.content }}
-          </view>
-          <view v-if="dynamic.list[id2Idx(id)].detail.imgUrl.startsWith('https://')"
-                class="grid flex-sub padding-lr col-1">
-            <view class="bg-img">
-              <image :src="dynamic.list[id2Idx(id)].detail.imgUrl"></image>
+          <view class="movecard-tag padding">
+            <!-- 内容 -->
+            <view class="text-content margin-bottom">
+              {{ nt.list[id2Idx(id)].details.slice(0,30) }}
+            </view>
+            <view v-for="(tag,tid) in (nt.list[id2Idx(id)].positionTags || '').split(',').filter(t => t!=='')"
+                  :key="tid"
+                  class='cu-tag text-orange bg-orange light radius good-tag'>
+              {{ tag }}
             </view>
           </view>
-          <view class="movecard-tag  padding">
-            <view
-              v-for="(tag,idx) in (dynamic.list[id2Idx(id)].detail.topicTags || '').split(',').filter(t=>t.length>0)"
-              :key="idx" class='cu-tag radius text-blue'>
-              {{ '#' + tag }}
-            </view>
-          </view>
-          <view class="movecard-icon text-gray padding">
-            <!-- 点赞 -->
-            <text :class="dynamic.list[id2Idx(id)].isLike ? 'cuIcon-appreciatefill text-red' : 'cuIcon-appreciate'">
-              {{ dynamic.list[id2Idx(id)].likeCount }}
-            </text>
-            <!-- 收藏 -->
-            <text :class="dynamic.list[id2Idx(id)].collection ? 'cuIcon-favorfill text-red' : 'cuIcon-favor'">
-              {{ dynamic.list[id2Idx(id)].collection ? '取消收藏' : '收藏' }}
-            </text>
-            <!-- 分享 -->
-            <text class="cuIcon-forwardfill text-red">分享</text>
+          <view v-for="(topic,pid) in nt.list[id2Idx(id)].topics"
+                :key="pid"
+                class="text-content">
+            <text class="text-white bg-orange text-sm my-tag">#</text>
+            <text>{{ topic }}</text>
           </view>
         </view>
       </view>
     </view>
     <van-empty v-else description="未找到相关数据源~~"/>
 
+    <!-- vant-weapp 轻提示 -->
+    <van-dialog id="van-dialog"/>
   </view>
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapActions, mapState} from 'vuex'
+import Dialog from '@/wxcomponents/@vant/weapp/dist/dialog/dialog';
 
 export default {
   data() {
@@ -77,29 +68,44 @@ export default {
       curPage: 1,
       pageSize: 5,
       ids: [],
-      pageTitle: '我的动态'
+      pageTitle: '我的内推',
+      type:0
     }
   },
   computed: {
-    ...mapState('dynamic', ['dynamic']),
+    ...mapState('nt', ['nt']),
     ...mapState('content', ['content']),
     pageCount() {
       console.log(this.ids.length)
       return Math.ceil(this.ids.length / this.pageSize)
     },
-    showDtList() {
+    showIds() {
       return this.ids.slice(0, this.curPage * this.pageSize)
     },
   },
   methods: {
+    ...mapActions('content',['getMyContent']),
+    delById (id) {
+      id = +id;
+      let idx = this.ids.indexOf(id)
+      Dialog.confirm({
+        title: '内推删除',
+        message: '确认要删除这条内推信息吗',
+      }).then(() => {
+        console.log(idx)
+        this.ids.splice(idx,1)
+        // TODO: 异步删除
+        this.$api.recommend.deleteById(id)
+      })
+    },
     /**
      * id 转 idx
      */
     id2Idx(id) {
       let idx = -1
-      for (let dt of this.dynamic.list) {
-        if (dt.detail.id === id) {
-          idx = this.dynamic.list.indexOf(dt)
+      for (let nt of this.nt.list) {
+        if (nt.id === id) {
+          idx = this.nt.list.indexOf(nt)
           break
         }
       }
@@ -129,19 +135,7 @@ export default {
     onLoad({type}) {
       console.log(typeof type)
       type = +type
-      switch (type) {
-        case 0:
-          this.ids = this.content.publishNews
-          break
-        case 1:
-          this.pageTitle = '我的收藏'
-          this.ids = this.content.collectNews
-          break
-        case 2:
-          this.pageTitle = '我的点赞'
-          this.ids = this.content.likeNews
-          break
-      }
+      this.type = type
     },
     /**
      * 页面跳转
@@ -149,10 +143,25 @@ export default {
     toPage(url) {
       uni.navigateTo({url})
     },
-  },
+    onShow () {
+      this.loadData()
+    },
+    async loadData() {
+      await this.getMyContent(null)
+      switch (this.type) {
+        case 0:
+          this.ids = this.content.publishRecommendations
+          break
+        case 1:
+          this.pageTitle = '我的订阅'
+          this.ids = this.content.likeRecommendations
+          break
+      }
+    },
+  }
 }
 </script>
 
 <style lang="scss">
-@import "../../../index/index";
+@import "../../../neitui/index";
 </style>

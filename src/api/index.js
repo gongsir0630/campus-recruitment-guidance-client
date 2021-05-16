@@ -10,6 +10,8 @@ import tags from "./modules/tags"
 import banner from "./modules/banner"
 import feedback from "@/api/modules/feedback"
 import content from "@/api/modules/content"
+import recommend from "@/api/modules/recommend"
+import history from "@/api/modules/history"
 
 
 export default {
@@ -24,5 +26,7 @@ export default {
   tags,
   banner,
   feedback,
-  content
+  content,
+  recommend,
+  history
 }

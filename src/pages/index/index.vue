@@ -12,11 +12,13 @@
     <view class="notice">
       <h1 class="text-center">柚子帮公告</h1>
       <view class="notice-list">
+        <!-- show notice list, click to see detail -->
         <view v-for="(item,idx) in showNoticeList" :key="idx" class="notice-item" @tap="showNotice(item)">
           <text class="cuIcon-noticefill text-orange notice-number"></text>
           <text class="notice-content">{{ item.title }}</text>
           <text class="notice-hottag">新</text>
         </view>
+        <!-- to all notice -->
         <view class="notice-item my-content" @tap="toPage('./notice/index')">
           <text class="notice-content text-blue">查看更多</text>
           <text class="cuIcon-right text-blue"></text>
@@ -39,6 +41,7 @@
               <view class="cu-avatar round lg">
                 <image class="cu-avatar lg round" :src="item.avatar"/>
               </view>
+              <!-- user info -->
               <view class="content flex-sub">
                 <view class="text-orange">{{ item.nickName }}</view>
                 <view v-if="item.jobTitle!=='未认证职业信息'" class="text-gray text-sm flex justify-between">
@@ -48,20 +51,25 @@
                   {{ item.major }}
                 </view>
               </view>
+              <!-- topRight menu -->
               <view class="my-moreandroid cuIcon-moreandroid text-gray" @tap.stop="onShare(item.detail.id)"></view>
             </view>
           </view>
+          <!-- dynamic content -->
           <view class="margin-top text-content">
             {{ item.detail.content }}
           </view>
+          <!-- image -->
           <view v-if="item.detail.imgUrl.startsWith('https://')" class="grid flex-sub padding-lr col-1">
             <view class="bg-img">
-              <image :src="item.detail.imgUrl"></image>
+              <image :src="item.detail.imgUrl" mode="aspectFit" @tap.stop="viewImg(item.detail.imgUrl)"></image>
             </view>
           </view>
+          <!-- tag -->
           <view class="movecard-tag  padding">
             <view v-for="(tag,idx) in (item.detail.topicTags || '').split(',').filter(t=>t.length>0)"
-                  :key="idx" class='cu-tag radius text-blue'>
+                  :key="idx" class='cu-tag radius text-blue'
+                  @tap.stop="toPage(`./search/index?tag=${tag}`)">
               {{ '#' + tag }}
             </view>
           </view>
@@ -87,7 +95,7 @@
     <view class="msg-publish" @tap="toPage('./publish/index')">
       <view class="msg-content">
         <text class="cuIcon-writefill text-black"></text>
-        <text class="msg-teƒxt">发布</text>
+        <text class="msg-text">发布</text>
       </view>
     </view>
 
@@ -160,6 +168,7 @@ export default {
           collectionList: ''
         }
       }],
+      imgList:[],
     }
   },
   computed: {
@@ -185,6 +194,12 @@ export default {
   methods: {
     ...mapActions('notice', ['getNoticeList']),
     ...mapActions('dynamic', ['getDynamicList']),
+    viewImg(imgUrl) {
+      uni.previewImage({
+        urls: [imgUrl],
+        current: imgUrl
+      });
+    },
     /**
      * id 转 idx
      */
@@ -273,7 +288,7 @@ export default {
       let idx = this.id2Idx(id)
       let openId = this.dynamicList[idx].detail.openId
       if (openId !== this.wxUser.openId) {
-        // 非本人视角，去掉删除、修改操作
+        // 非本人视角，去掉删除操作
         this.options = Share_Options.slice(0, 2)
       } else {
         this.options = Share_Options
@@ -296,13 +311,14 @@ export default {
       let opName = event.detail.name
       console.log(opName);
       switch (opName) {
-        case "收藏":
-          this.onCollection(this.shareItemId)
+        case "复制链接":
+          uni.showToast({
+            title:'链接复制成功',
+            icon:'success'
+          })
           break;
         case "删除":
           this.onDelete(this.shareItemId)
-          break;
-        case "修改":
           break;
       }
       this.onClose();

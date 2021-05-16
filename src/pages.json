@@ -27,6 +27,18 @@
       }
     },
     {
+      // 详情页
+      "path": "pages/neitui/detail/index"
+    },
+    {
+      // 搜索页
+      "path": "pages/neitui/search/index"
+    },
+    {
+      // 订阅
+      "path": "pages/neitui/subscribe/index"
+    },
+    {
       "path": "pages/help/index",
       "style": {
         "navigationBarTitleText": "柚子帮"
@@ -54,7 +66,23 @@
       "path": "pages/me/auth/index"
     },
     {
+      "path": "pages/me/auth/applyAuth"
+    },
+    {
+      // 内容管理
       "path": "pages/me/content/index"
+    },
+    {
+      // 我的动态
+      "path": "pages/me/content/dt/index"
+    },
+    {
+      // 我的内推
+      "path": "pages/me/content/nt/index"
+    },
+    {
+      // 关注
+      "path": "pages/me/content/user/index"
     },
     {
       "path": "pages/me/about/index"

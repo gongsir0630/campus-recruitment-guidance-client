@@ -8,7 +8,7 @@
     <!-- 信息完善 -->
     <view class="mine-info">
       <view class="cu-avatar xl round margin-left bg-red">
-        <image class="cu-avatar xl margin-left round" :src="wxUser.avatar"></image>
+        <image class="cu-avatar xl round" :src="wxUser.avatar"></image>
       </view>
     </view>
     <!-- 设置信息 -->
@@ -20,7 +20,7 @@
       </view>
       <view class="cu-form-group">
         <view class="title">昵称</view>
-        <input name="input" v-model="wxUser.nickName"/>
+        <input name="input" class="text-right" v-model="wxUser.nickName"/>
       </view>
       <view class="cu-form-group">
         <view class="title">性别</view>
@@ -32,7 +32,7 @@
       </view>
       <view class="cu-form-group">
         <view class="title">真实姓名</view>
-        <input name="input" v-model="wxUser.realName"/>
+        <input name="input" class="text-right" v-model="wxUser.realName"/>
       </view>
       <view class="cu-form-group">
         <view class="title">手机号码</view>
@@ -46,10 +46,10 @@
           </view>
         </view>
       </view>
-      <view class="cu-form-group">
-        <view class="title">邮箱</view>
-        <input name="input" v-model="wxUser.email"/>
-      </view>
+<!--      <view class="cu-form-group">-->
+<!--        <view class="title">邮箱</view>-->
+<!--        <input name="input" v-model="wxUser.email"/>-->
+<!--      </view>-->
       <view class="cu-bar bg-white neitui-bar margin-top">
         <view class="action">
           <text class="cuIcon-titles text-orange"></text>当前状态
@@ -80,13 +80,17 @@
         </picker>
       </view>
       <view class="cu-form-group">
+        <view class="title">入学年份</view>
+        <input name="input" class="text-right" placeholder="例: 2017" v-model="eduInfo.entrance"/>
+      </view>
+      <view class="cu-form-group">
         <view class="title">学历</view>
         <picker @change="indexChange('level',$event)" :value="levelIndex" :range="levelPicker">
           <view class="picker">{{levelPicker[levelIndex]}}</view>
         </picker>
       </view>
       <view class="cu-form-group">
-        <view class="title">个人简介</view>
+        <view class="title">一句话描述下自己</view>
         <input name="input" v-model="wxUser.profile"/>
       </view>
       <!-- 工作信息, 根据当前状态动态显示 -->
@@ -104,15 +108,15 @@
         </view>
         <view class="cu-form-group">
           <view class="title">所在部门</view>
-          <input name="input" v-model="jobInfo.department"/>
+          <input name="input" class="text-right" v-model="jobInfo.department"/>
         </view>
         <view class="cu-form-group">
           <view class="title">职位名称</view>
-          <input name="input" v-model="jobInfo.jobTitle"/>
+          <input name="input" class="text-right" v-model="jobInfo.jobTitle"/>
         </view>
         <view class="cu-form-group">
           <view class="title">经历描述</view>
-          <input name="input" v-model="jobInfo.description"/>
+          <input name="input" class="text-right" v-model="jobInfo.description"/>
         </view>
       </template>
     </form>
@@ -124,7 +128,7 @@
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import {mapActions, mapMutations, mapState} from "vuex";
 import {Gender} from "@/constants";
 
 export default {
@@ -133,11 +137,11 @@ export default {
       toLogin:false,
       // 选择器，部分需要从 api 初始化
       sexPicker:['男','女'],
-      schPicker:[],
-      majPicker:[],
+      schPicker:null,
+      majPicker:null,
       levelPicker:['本科','硕士','博士及以上'],
-      companyPicker:[],
-      nowPicker:['学生（提交教育信息）','工作（提交教育信息和工作信息）'],
+      companyPicker:null,
+      nowPicker:['学生（完善教育信息）','工作（完善教育信息和工作信息）'],
       sexIndex:0,
       schIndex:0,
       majIndex:0,
@@ -159,6 +163,7 @@ export default {
   methods:{
     ...mapActions('edu',['getEduInfoById']),
     ...mapActions('job',['getJobInfoById']),
+    ...mapMutations('user',['setLoginStatus']),
     onLoad ({toLogin}) {
       // 是否自动登录
       this.toLogin = toLogin
@@ -167,10 +172,15 @@ export default {
     /**
      * 页面数据预拉取：学校、公司下拉列表
      */
-    dataInit () {
+    async dataInit () {
+      if (this.wxUser.jobId !== 0) {
+        this.nowIndex = 1
+      }
       console.log("--->获取学校下拉列表<---")
-      this.schPicker = this.$api.school.getSchoolList()
+      const {data} = await this.$api.school.getSchoolList()
+      this.schPicker = data
       console.log(this.schPicker)
+
       // 选中我的学校
       this.schPicker.forEach(sch => {
         if (this.eduInfo.schoolId === sch.id) {
@@ -178,10 +188,11 @@ export default {
         }
       })
       // 专业列表变化
-      this.majPicker = this.schPicker[this.schIndex].majors
+      this.majPicker = this.schPicker[this.schIndex].majorList.split(',')
 
       console.log("--->获取公司下拉列表<---")
-      this.companyPicker = this.$api.company.getCompanyList()
+      const res = await this.$api.company.getCompanyList()
+      this.companyPicker = res?.data
       console.log(this.companyPicker)
       // 选中我的公司
       this.companyPicker.forEach(com => {
@@ -191,12 +202,20 @@ export default {
     },
     // 更新用户信息
     async toUpdate() {
+      // 性别
       this.wxUser.gender = this.sexPicker[this.genderIndex];
 
       this.eduInfo.major = this.majPicker[this.majIndex];
       this.eduInfo.level = this.levelPicker[this.levelIndex];
       this.eduInfo.schoolId = this.schPicker[this.schIndex].id;
+      this.eduInfo.graduate = Number(this.eduInfo.entrance)+4;
+
       this.jobInfo.companyId = this.companyPicker[this.companyIndex].id;
+      let job_id = this.jobInfo.id
+      if (this.nowIndex === 0) {
+        job_id = -1
+      }
+      this.jobInfo.id = job_id
       let userInfo = {
         wxUser: this.wxUser,
         eduInfo: this.eduInfo,
@@ -207,11 +226,22 @@ export default {
       console.log(errMsg)
       if (code === 0) {
         if (this.toLogin) {
-          this.isLogin = false
+          // 注册成功,跳转首页,自动登录
+          this.setLoginStatus(false)
+          uni.showToast({
+            title:'注册完成~',
+            duration:2000
+          })
+          setTimeout(()=>{
+            uni.navigateBack({delta:1})
+          },2000)
         } else {
           uni.showToast({
             title:'信息更新成功'
           })
+          setTimeout(()=>{
+            uni.navigateBack({delta:1})
+          },2000)
         }
       }
     },

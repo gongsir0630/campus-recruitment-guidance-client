@@ -6,7 +6,7 @@
     </cu-custom>
     <!-- 正文 -->
     <view class='margin-xl bg-white padding-xl radius shadow-lg'>
-      <view class='text-center margin-bottom text-lg  text-grey'>加入我们</view>
+      <view class='text-center margin-bottom text-lg  text-grey'>联系我们</view>
       <view class='text-content'>
         <view>柚子帮</view>
       </view>

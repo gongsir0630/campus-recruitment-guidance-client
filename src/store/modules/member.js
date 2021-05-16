@@ -6,7 +6,7 @@ const state = {
     applyTime:'',
     certificationStatus:'',
     currentState:'',
-    fieldTags:"考研保研,校招答疑,简历指导,岗位内推,学科竞赛,校园社团,技术咨询",
+    fieldTags:"",
     id:-1,
     introduction:"",
     likeCount:0,
@@ -14,30 +14,114 @@ const state = {
     openId:'',
     photo:'',
     title:'',
-    topics:'[{"key":"测试1","val":"测试 111"}]'
+    topics:'[{"key":"","val":""}]',
+    user:{
+      openId: 'visitor',
+      avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
+      nickName: '游客',
+      gender: '男',
+      realName:'游客',
+      phoneNumber:'',
+      email:'',
+      eduId: 0,
+      jobId: 0,
+      profile:'',
+      eduInfo:{
+        id: 0,
+        schoolId:1,
+        major:'',
+        entrance:'',
+        graduate:'',
+        level:'',
+        description:'',
+        status:'',
+        school: {
+          id:1,
+          logo:'',
+          name:'',
+          majorList:'',
+          mailSuffix:''
+        }
+      },
+      jobInfo:{
+        id: 0,
+        openId:'',
+        companyId:1,
+        department:'',
+        jobTitle:'',
+        description:'',
+        status:'',
+        company: {
+          id:1,
+          logo:'',
+          name:'',
+          slogan:'',
+          mailSuffix:''
+        }
+      }
+    }
   },
   member: {
     total: 0,
     list: [{
-      companyName:"请先完成职位认证",
-      grade:"2017",
-      major:"计科",
-      member:{
-        applyTime:"2021-04-27",
-        certificationStatus:"待审核",
-        currentState:"工作",
-        fieldTags:"考研保研,校招答疑,简历指导,岗位内推,学科竞赛,校园社团,技术咨询",
-        id:4,
-        introduction:"测试测试",
-        likeCount:1,
-        likeList:"olAW-4vIdX8DTkzftHveDWIlR4zU",
-        openId:"olAW-4vIdX8DTkzftHveDWIlR4zU",
-        photo:"https://cdn.yzhelp.top/campus-recruitment-guidance/visitor/d640f58c-50c5-40f1-a252-36bd8e1f44a9.png",
-        title:"计算机协会会长",
-        topics:""
-      },
-      realName:"龚涛",
-      selectStatus:"工作"
+      applyTime:"2021-04-27",
+      certificationStatus:"待审核",
+      currentState:"工作",
+      fieldTags:"考研保研,校招答疑,简历指导,岗位内推,学科竞赛,校园社团,技术咨询",
+      id:4,
+      introduction:"测试测试",
+      likeCount:1,
+      likeList:"olAW-4vIdX8DTkzftHveDWIlR4zU",
+      openId:"olAW-4vIdX8DTkzftHveDWIlR4zU",
+      photo:"https://cdn.yzhelp.top/campus-recruitment-guidance/visitor/d640f58c-50c5-40f1-a252-36bd8e1f44a9.png",
+      title:"计算机协会会长",
+      topics:"",
+      user:{
+        openId: 'visitor',
+        avatar: 'https://thirdqq.qlogo.cn/qqapp/1110061270/E0B4163FDCD19C3791B49B64EDB9F688/100',
+        nickName: '游客',
+        gender: '男',
+        realName:'游客',
+        phoneNumber:'',
+        email:'',
+        eduId: 0,
+        jobId: 0,
+        profile:'',
+        eduInfo:{
+          id: 0,
+          openId:'',
+          schoolId:1,
+          major:'',
+          entrance:'',
+          graduate:'',
+          level:'',
+          description:'',
+          status:'',
+          school: {
+            id:1,
+            logo:'',
+            name:'',
+            majorList:'',
+            mailSuffix:''
+          }
+        },
+        jobInfo:{
+          id: 0,
+          openId:'',
+          companyId:1,
+          department:'',
+          jobTitle:'',
+          description:'',
+          status:'',
+          company: {
+            id:1,
+            logo:'',
+            name:'',
+            slogan:'',
+            mailSuffix:''
+          }
+        }
+      }
     }]
   }
 }

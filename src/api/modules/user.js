@@ -36,9 +36,14 @@ const getNickNameByOpenIds = openIds => {
   })
 }
 
+const getUserInfoByOpenId = openId => {
+  return http.get(`wx/user/${openId}`)
+}
+
 export default {
   updateUserInfo,
   login,
   getProfile,
-  getNickNameByOpenIds
+  getNickNameByOpenIds,
+  getUserInfoByOpenId
 }

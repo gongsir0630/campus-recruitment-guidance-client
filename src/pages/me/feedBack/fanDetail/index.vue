@@ -92,9 +92,12 @@ export default {
         if (code === 0) {
           uni.showToast({
             title:'提交成功, 感谢你的反馈和建议',
-            icon:'success'
+            icon:'success',
+            duration:2000
           })
-          // todo: 页面刷新
+          setTimeout(() => {
+            uni.navigateBack({delta:1})
+          },2000)
         }
       } catch (err) {
         console.log(err)

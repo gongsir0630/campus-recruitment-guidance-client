@@ -1,10 +1,11 @@
 import axios from 'axios-miniprogram'
+import store from '../store/index'
 
 const http = axios
 
 // 请求base路径
 http.defaults.baseURL = 'http://yzhelp.test.utools.club/'
-// http.defaults.baseURL = 'https://yzhelp.top'
+http.defaults.baseURL = 'https://yzhelp.top'
 http.defaults.headers = {
   // 'content-Type': 'application/json'
   'content-type':'application/x-www-form-urlencoded'
@@ -36,6 +37,10 @@ http.interceptors.response.use(
 
     // 部分功能需要登录才能访问
     if (code === 401) {
+      // 清除本地登录状态
+      console.log('delete token')
+      uni.removeStorageSync("token")
+      store.commit('user/clearToken')
       uni.showModal({
         title:'提示',
         content:'你还没有登录奥~',
@@ -51,7 +56,7 @@ http.interceptors.response.use(
     console.log(err)
     uni.showModal({
       title:'提示',
-      content:'出错了，请联我们~',
+      content:'出错了，请联系我~',
       showCancel:false
     })
     return Promise.reject(err)

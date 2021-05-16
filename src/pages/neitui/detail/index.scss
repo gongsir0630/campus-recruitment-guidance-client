@@ -1,25 +1,49 @@
 page {
-  background-color: #fff;
-}
-
-.my-moreandroid {
-  width: 40px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  z-index: 99;
-}
-
-.dian-box {
-  display: flex;
-  justify-content: space-around;
   background: #fff;
-  margin-top: 20px;
-  margin-left: 10%;
-  margin-right: 10%;
 }
 
-.dian-name {
-  padding: 0 20px;
-  margin-top: 20px;
+.my-tag {
+  border-radius: 30%;
+  padding: 1px;
+}
+
+.neitype {
+  margin-right: 10px;
+}
+
+.good-tag {
+  margin-right: 10px;
+}
+
+.zhidetail {
+  background: #fff;
+  padding: 10px;
+
+  h1 {
+    margin-bottom: 10px;
+  }
+}
+
+.topbg {
+  height: 100px;
+  width: 100%;
+  background: #fa8c15;
+  position: relative;
+
+  .my-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -40px;
+    right: 40px;
+    z-index: 99;
+    background: pink;
+
+    image {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+  }
 }

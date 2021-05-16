@@ -8,6 +8,13 @@ function getJobInfoById (id) {
   return http.get(`wx/job/${id}`)
 }
 
+const sendMail = (mail) => {
+  return http.get(`wx/job/auth/mail`,{
+    mail
+  })
+}
+
 export default {
-  getJobInfoById
+  getJobInfoById,
+  sendMail
 }

@@ -23,11 +23,11 @@
       </view>
       <view class="cu-form-group">
         <view class="title">教育信息</view>
-        <text>{{ eduInfo.major }}-{{ eduInfo.entrance }}-{{ wxUser.realName }}</text>
+        <text>{{ eduInfo.school.name }}-{{ eduInfo.major }}-{{ wxUser.realName }}</text>
       </view>
       <view v-if="statusIndex === 1" class="cu-form-group">
         <view class="title">工作信息</view>
-        <text>{{ jobInfo.department }}-{{ jobInfo.jobTitle }}</text>
+        <text>{{ jobInfo.company.name }}-{{ jobInfo.jobTitle }}</text>
       </view>
       <!-- 头衔 -->
       <view class="cu-bar bg-white neitui-bar margin-top">
@@ -56,7 +56,7 @@
         </view>
       </view>
       <checkbox-group class="block" @change="CheckboxChange">
-        <view class="cu-form-group" v-for="item in tagsList" :key="item.id">
+        <view class="cu-form-group" v-for="(item,idx) in tagsList" :key="idx">
           <view class="title">{{ item.tagName }}</view>
           <checkbox :value="item.tagName"
                     :checked="selectedList.includes(item.tagName)">
@@ -200,8 +200,11 @@ export default {
         if (code === 0) {
           Toast.success({
             message: '信息更新成功',
-            forbidClick: true
+            forbidClick: true,
           })
+          setTimeout(()=>{
+            uni.navigateBack({delta:1})
+          },2000)
         }
       } catch (err) {
         console.log("更新失败")
@@ -293,7 +296,7 @@ export default {
       await this.getMyInfo(null)
       console.log(this.myInfo)
       // todo: 获取教育认证状态
-      if (this.eduInfo.id === 0) {
+      if (this.eduInfo.status !== '认证通过') {
         uni.showModal({
           title: '提示',
           content: '请先完成教育认证~',
@@ -310,7 +313,7 @@ export default {
         if (this.myInfo.currentState === "工作")
           this.statusIndex = 1
         // 头衔数据
-        this.myInfo.title = (this.myInfo.title || '').split(',')
+        this.myInfo.title = this.myInfo.title !== '' ? (this.myInfo.title || '').split(',') : ['']
         this.showTitleId = this.myInfo.title.length
         for (let i = 0; i < this.showTitleId; i++) {
           this.titleList[i] = this.myInfo.title[i]
@@ -329,7 +332,7 @@ export default {
           this.inputTopic[i * 2 + 1] = this.topicsList[i].val
         }
         // 头像数据
-        this.imgList[0] = this.myInfo.photo
+        this.imgList[0] = this.myInfo.photo === '' ? this.wxUser.avatar : this.myInfo.photo
         // 领域标签选中数据
         this.selectedList = (this.myInfo.fieldTags || '').split(',')
       }

@@ -8,7 +8,7 @@
       <view class="mine-info">
         <view class="cu-avatar xl margin-left round">
 <!--          <open-data type="userAvatarUrl"></open-data>-->
-           <image class="cu-avatar xl margin-left round" :src="wxUser.avatar"></image>
+           <image class="cu-avatar xl round" :src="wxUser.avatar"></image>
         </view>
         <button
           v-if="showLogin"
@@ -20,7 +20,8 @@
         </button>
         <view v-else class="info">
           你好，
-          <open-data type="userNickName"></open-data>
+          <!-- <open-data type="userNickName"></open-data> -->
+          <text>{{wxUser.nickName}}</text>
           <!-- TODO:性别用颜色加以区分 -->
           <!-- <text class="sex">{{ sex }}</text> -->
         </view>
@@ -51,9 +52,9 @@
 
     <view class="cu-list menu sm-border card-menu margin-top" >
       <view class="cu-item arrow">
-        <button class="cu-btn content">
+        <button class="cu-btn content" open-type="contact">
           <text class="cuIcon-btn text-olive"></text>
-          <text class="text-grey">万能客服</text>
+          <text class="text-grey">客服咨询</text>
         </button>
       </view>
       <view class="cu-item arrow">
@@ -82,7 +83,7 @@
 
 <script>
 import {wxLogin, getUserProfile} from '@/utils/userUtil'
-import {mapState, mapActions, mapMutations} from 'vuex'
+import {mapState, mapActions} from 'vuex'
 import {Gender} from '@/constants'
 import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
 
@@ -100,16 +101,37 @@ export default {
   },
   methods: {
     // 引入 user 命名空间下的方法
-    ...mapActions('user', ['setToken', 'setUserInfo','setLoginStatus']),
+    ...mapActions('user', ['setToken', 'setUserInfo','setWxUserInfo','setLoginStatus']),
     ...mapActions('edu', ['getEduInfoById']),
     ...mapActions('job', ['getJobInfoById']),
+    /**
+     * 自动登录
+     * @returns {Promise<void>}
+     */
+    async autoLogin() {
+      const {data} = await this.$api.user.getProfile()
+      // 获取用户信息
+      const userInfo = data?.userInfo
+      this.setUserInfo(userInfo)
+      // eduInfo
+      await this.getEduInfoById(this.wxUser.eduId)
+      // jobInfo
+      await this.getJobInfoById(this.wxUser.jobId)
+      // 设置登录状态
+      this.setLoginStatus(true)
+      console.log("login success, 欢迎你: "+this.wxUser.nickName)
+      console.log(this.wxUser)
+    },
     /**
      *
      */
     onShow () {
-      console.log(this.toLogin)
+      console.log("current loginStatus: "+this.isLogin)
+      console.log("app token: "+this.token)
       // token有效则自动登录
-      if (this.token && this.isLogin) {
+      this.showLogin = !(this.token && this.isLogin && this.wxUser.openId!=='visitor');
+      if (this.token && !this.isLogin) {
+        this.autoLogin()
         this.showLogin = false
       }
     },
@@ -132,10 +154,13 @@ export default {
       getUserProfile()
         .then(async ([err, res]) => {
           // 临时获取用户的微信公开信息
-          const {nickName, gender, avatarUrl} = res?.userInfo
+          let {nickName, gender, avatarUrl} = res?.userInfo
+          console.log(gender)
+          // 性别转换
+          gender = gender === Gender.MALE ? '男' : '女'
           console.log('用户信息: ' + nickName)
-          // 存入vuex
-          this.setUserInfo({
+          // 将微信基本信息存入vuex
+          this.setWxUserInfo({
             nickName: nickName,
             gender,
             avatar: avatarUrl
@@ -147,30 +172,33 @@ export default {
               const {code, data, errMsg} = await this.$api.user.login(
                 res.code
               )
+              // 获取 token
+              const token = data.token
+              this.setToken(token)
               // 首次登录，跳转注册
               if (code === 1000) {
                 // TODO: 注册
                 uni.navigateTo({
                   url: `./profile/index?toLogin=${true}`,
                 })
+              } else {
+                // 用户已存在，直接登录获取信息
+                // 获取用户信息
+                const userInfo = data.userInfo
+                // 将完整用户信息存入vuex
+                this.setUserInfo(userInfo)
+                // eduInfo
+                await this.getEduInfoById(this.wxUser.eduId)
+                // jobInfo
+                await this.getJobInfoById(this.wxUser.jobId)
+                // 设置登录状态
+                this.setLoginStatus(true)
+                Toast.success({
+                  message: '登录成功',
+                  forbidClick: true
+                })
+                this.showLogin = false
               }
-              // 直接登录
-              // 获取 token
-              const token = data.token
-              // 获取用户信息
-              const userInfo = data.userInfo
-              // 存入vuex
-              this.setToken(token)
-              this.setUserInfo(userInfo)
-              // eduInfo
-              await this.getEduInfoById(this.wxUser.eduId)
-              // jobInfo
-              await this.getJobInfoById(this.wxUser.jobId)
-              Toast.success({
-                message: '登录成功',
-                forbidClick: true
-              })
-              this.showLogin = false
             } catch (error) {
               Toast.fail(` 登陆失败\n${error.msg}`)
               this.showLogin = true

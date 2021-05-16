@@ -14,7 +14,7 @@
 			</view>
 			<!-- 切换 -->
 			<view class="left" v-if="isOrder" @tap="changeType">
-				<text class="cuIcon-order"></text>
+				<text class="cuIcon-order margin-left"></text>
 				<slot name="order"></slot>
 			</view>
       <!-- 标题内容 -->

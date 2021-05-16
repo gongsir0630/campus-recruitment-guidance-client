@@ -3,51 +3,13 @@
     <!-- 自定义导航栏 -->
     <cu-custom bgColor="#f0f0f0" isBack="true">
       <block slot="back">取消</block>
-      <block slot="navname">柚子帮-校招指导服务平台</block>
+      <block slot="navname">柚子帮-内推订阅</block>
     </cu-custom>
 
-    <!-- 内容输入 -->
-    <van-cell-group>
-      <van-field
-        :value="content"
-        type="textarea"
-        placeholder="这一刻想分享点什么~"
-        :autosize="{ minHeight: 200 }"
-        :border=true
-        maxlength="100"
-        show-word-limit=true
-        auto-focus=true
-        @change="inputContent"
-      />
-    </van-cell-group>
-    <!-- 图片上传 -->
-    <view class="cu-bar bg-white">
-      <view class="action">
-        要不来一张图片？
-      </view>
-      <view class="action">
-        {{ imgList.length }}
-      </view>
-    </view>
-    <!-- 图片预览 -->
-    <view class="cu-form-group">
-      <view class="grid col-4 grid-square flex-sub">
-        <view class="bg-img" v-for="(item,index) in imgList"
-              :key="index" @tap="viewImg" :data-url="imgList[index]">
-          <image :src="item" mode="aspectFill"></image>
-          <view class="cu-tag bg-red" @tap.stop="deleteImg" :data-index="index">
-            <text class='cuIcon-close'></text>
-          </view>
-        </view>
-        <view class="solids" @tap="chooseImg" v-if="imgList.length<1">
-          <text class='cuIcon-cameraadd'></text>
-        </view>
-      </view>
-    </view>
-    <!-- 添加标签选择 -->
+    <!-- 添加订阅标签 -->
     <view class="cu-bar bg-white margin-top">
       <view class="action">
-        话题标签
+        职位标签
       </view>
     </view>
     <view class="cu-form-group justify-start">
@@ -60,7 +22,7 @@
         </view>
       </template>
       <template v-else>
-        <text class="text-content text-gray">试试添加一些话题标签吧~~</text>
+        <text class="text-content text-gray">订阅喜欢的职位标签吧~~</text>
       </template>
     </view>
     <view class="cu-form-group justify-center">
@@ -72,14 +34,14 @@
     <!-- 发布按钮 -->
     <view class="cu-bar btn-group margin-top">
       <button class="cu-btn bg-orange shadow-blur round lg"
-              :disabled="content.length===0"
-              @tap="save">
-        发布
+              :disabled="subStatus"
+              @tap="sendMsg">
+        订阅
       </button>
     </view>
 
     <!-- 弹出面板 -->
-    <van-action-sheet :show="isShowDialog" title="选择话题标签" @click-overlay="onClose" @close="onClose">
+    <van-action-sheet :show="isShowDialog" title="选择职位标签" @click-overlay="onClose" @close="onClose">
       <checkbox-group class="block" @change="CheckboxChange">
         <view class="cu-form-group" v-for="(item,idx) in allTagList" :key="idx">
           <view class="title">{{ item.tagName }}</view>
@@ -100,52 +62,55 @@
 </template>
 
 <script>
-import {ChooseImage, DelImg, ViewImage} from "@/utils/uploadFile";
+
+import {TEMPLATE_IDS} from '@/constants'
+import {mapActions, mapState} from "vuex";
 
 export default {
   data() {
     return {
       isShowDialog: false,
-      imgList: [],
-      content: '',
       myTagList: [],
-      allTagList: [{
-        id: 9,
-        tagName: '近日动态'
-      }, {
-        id: 10,
-        tagName: '失物招领'
-      }]
+      allTagList: [],
+      subStatus:true
     }
   },
+  computed: {
+    ...mapState('history',['history']),
+  },
   methods: {
+    ...mapActions('history',['getMyAllHistory']),
     onShow () {
       this.loadAllTagList()
+      this.loadAllHistory()
+    },
+    async loadAllHistory () {
+      // 加载搜索历史
+      await this.getMyAllHistory(null)
+      this.myTagList = this.history.subscribe?.split(',').map(Number)
     },
     async loadAllTagList () {
-      const {data} = await this.$api.tags.getTagsByType(0)
+      const {data} = await this.$api.tags.getTagsByType(1)
       this.allTagList = data
     },
-    async save () {
-      let info = {
-        content: this.content,
-        imgUrl: this.imgList[0] ? this.imgList[0] : '',
-        topicTags: (this.myTagList || []).join(",")
-      }
-      console.log(info)
-      // 异步发布
-      const {code,errMsg,data} = await this.$api.dynamic.save(info)
-      if (code === 0) {
-        uni.showToast({
-          title:'动态发布成功~',
-          duration:2000
-        })
-        setTimeout(function () {
-          uni.navigateBack({
-            delta:1
-          })
-        },2000)
-      }
+    /**
+     * 订阅
+     */
+    sendMsg () {
+      wx.requestSubscribeMessage({
+        tmplIds:TEMPLATE_IDS.nt_sub_id,
+        success: (res) => {
+          // TODO: 保存订阅记录
+          console.log(res)
+          this.save()
+        }
+      })
+    },
+    save () {
+      const key = 'subscribe'
+      let val = this.myTagList.join(',')
+      console.log(this.myTagList)
+      this.$api.history.saveHistory(key,val)
     },
     inputContent (e) {
       this.content = e.detail
@@ -156,6 +121,7 @@ export default {
     deleteTag (id) {
       let idx = this.myTagList.indexOf(id)
       this.myTagList.splice(idx,1)
+      this.subStatus = this.myTagList.length===0
       console.log(this.myTagList)
     },
     onAddTag () {
@@ -167,21 +133,13 @@ export default {
     CheckboxChange(e) {
       this.myTagList = e.detail.value.map(Number)
       console.log(this.myTagList)
+      this.subStatus = this.myTagList.length===0
     },
     getTagNameById (id) {
       for (const tag of this.allTagList) {
         if (tag.id === id ) return tag.tagName
       }
     },
-    chooseImg() {
-      ChooseImage(this)
-    },
-    deleteImg(e) {
-      DelImg(e, this)
-    },
-    viewImg(e) {
-      ViewImage(e, this)
-    }
   }
 }
 </script>

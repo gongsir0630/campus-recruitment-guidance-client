@@ -28,8 +28,8 @@
               <view class='text-content'>
                 {{ item.content }}
               </view>
-              <view v-if="item.picUrl!==''" class="bg-img">
-                <image :src="item.picUrl" mode="aspectFit"></image>
+              <view v-if="item.picUrl.startsWith('https://')" class="bg-img">
+                <image :src="item.picUrl" mode="aspectFit" @tap="viewImg(item.picUrl)"></image>
               </view>
             </view>
           </view>
@@ -48,7 +48,13 @@ export default {
       myFeeds:{
         total:10,
         list:[{
-
+          acceptStatus: "待受理",
+          content: "暂时不支持emoji字段 开启事务管理",
+          feedTime: "2021-05-03",
+          id: 6,
+          openId: "olAW-4vIdX8DTkzftHveDWIlR4zU",
+          picUrl: "",
+          type: "BUG 提交",
         }]
       }
     }
@@ -57,6 +63,12 @@ export default {
     ...mapState('user',['wxUser']),
   },
   methods: {
+    viewImg(imgUrl) {
+      uni.previewImage({
+        urls: [imgUrl],
+        current: imgUrl
+      });
+    },
     onShow () {
       this.loadMyFeed()
     },

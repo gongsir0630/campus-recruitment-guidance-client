@@ -4,11 +4,19 @@ import api from '@/api/index'
 const state = {
   jobInfo: {
     id: 0,
+    openId:'',
     companyId:1,
     department:'',
     jobTitle:'',
     description:'',
-    status:''
+    status:'',
+    company: {
+      id:1,
+      logo:'',
+      name:'',
+      slogan:'',
+      mailSuffix:''
+    }
   }
 }
 
@@ -18,7 +26,9 @@ const getters = {
 
 const mutations = {
   setJobInfo (state, payload) {
-    state.jobInfo = payload
+    if (payload) {
+      state.jobInfo = payload
+    }
   }
 }
 
