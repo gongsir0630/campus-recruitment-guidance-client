@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 
 export default {
   data() {
@@ -99,6 +99,7 @@ export default {
     ...mapState('user',['wxUser']),
   },
   methods: {
+    ...mapActions('nt',['getRecommendationList']),
     viewImg(imgUrl) {
       uni.previewImage({
         urls: [imgUrl],
@@ -110,6 +111,9 @@ export default {
      * @param id
      */
     onLoad ({id}) {
+      if (this.nt.total === 0) {
+        this.getRecommendationList(0)
+      }
       // 类型转换，坑
       id = +id
       console.log("查看内推详情: "+id)

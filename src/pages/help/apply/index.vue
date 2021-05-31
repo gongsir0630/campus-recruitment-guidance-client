@@ -193,10 +193,13 @@ export default {
       this.myInfo.topics = JSON.stringify(updateTopics.slice(0, this.showTopicId))
       this.myInfo.photo = this.imgList[0] ? this.imgList[0] : this.wxUser.avatar
 
-      console.log(this.myInfo)
+      // 省略user属性
+      const { user,...newInfo } = this.myInfo
+
+      console.log(newInfo)
 
       try {
-        const {code, errMsg, data} = await this.$api.member.saveOrUpdateInfo(this.myInfo)
+        const {code, errMsg, data} = await this.$api.member.saveOrUpdateInfo(newInfo)
         if (code === 0) {
           Toast.success({
             message: '信息更新成功',

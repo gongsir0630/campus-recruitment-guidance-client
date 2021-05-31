@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 
 export default {
   data() {
@@ -157,6 +157,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('member',['getMemberList']),
     async likeThisMember () {
       console.log(`点赞柚子帮成员: ${this.item.id}`)
       await this.$api.member.like(this.item.id)
@@ -172,6 +173,10 @@ export default {
       this.isFollow = !this.isFollow
     },
     onLoad ({id}) {
+      // 修复分享页面无数据
+      if (this.member.total === 0) {
+        this.getMemberList(null)
+      }
       // 类型转换，坑
       id = +id
       console.log("查看成员详情: "+id)

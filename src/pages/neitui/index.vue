@@ -35,6 +35,7 @@ export default {
   computed: {
     ...mapState('user',['wxUser']),
     ...mapState('nt',['nt']),
+    ...mapState('job',['jobInfo']),
     /**
      * 计算属性处理显示数据
      */
@@ -75,8 +76,16 @@ export default {
      */
     changType() {
       if (this.typename === '发内推') {
-        this.neiType = false;
-        this.typename = '看内推';
+        if (this.jobInfo.status === '认证通过') {
+          this.neiType = false;
+          this.typename = '看内推';
+        } else {
+          uni.showModal({
+            title:'提示',
+            content:'请先完成工作信息认证',
+            showCancel:false
+          })
+        }
       } else if (this.typename === '看内推') {
         this.neiType = true;
         this.typename = '发内推';

@@ -94,7 +94,7 @@ import Toast from '@/wxcomponents/@vant/weapp/dist/toast/toast'
 // 引入 vant-weapp-dialog 组件 -> 公告弹窗查看详情
 import Dialog from '@/wxcomponents/@vant/weapp/dist/dialog/dialog';
 import {Share_Options} from '@/constants'
-import {mapState} from 'vuex';
+import {mapActions, mapState} from 'vuex';
 
 export default {
   data() {
@@ -129,6 +129,7 @@ export default {
     ...mapState('dynamic', ['dynamic']),
   },
   methods: {
+    ...mapActions('dynamic',['getDynamicList']),
     viewImg(imgUrl) {
       uni.previewImage({
         urls: [imgUrl],
@@ -228,6 +229,9 @@ export default {
      * @param id
      */
     onLoad ({id}) {
+      if (this.dynamic.total === 0) {
+        this.getDynamicList(null)
+      }
       // 类型转换，坑
       id = +id
       for (let dt of this.dynamic.list) {
