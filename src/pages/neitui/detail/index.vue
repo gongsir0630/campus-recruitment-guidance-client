@@ -106,14 +106,17 @@ export default {
         current: imgUrl
       });
     },
+    async loadAllData () {
+      if (this.nt.total === 0) {
+        await this.getRecommendationList(0)
+      }
+    },
     /**
      * 页面加载监听
      * @param id
      */
     onLoad ({id}) {
-      if (this.nt.total === 0) {
-        this.getRecommendationList(0)
-      }
+      this.loadAllData()
       // 类型转换，坑
       id = +id
       console.log("查看内推详情: "+id)
@@ -122,7 +125,15 @@ export default {
           this.item = t
       }
       console.log(this.item)
-    }
+    },
+    onShareAppMessage(res) {
+      if (res.from === 'button') {// 来自页面内分享按钮
+        console.log(res.target)
+      }
+      return {
+        path: '/pages/neitui/detail/index?id='+this.item.id
+      }
+    },
   }
 }
 </script>

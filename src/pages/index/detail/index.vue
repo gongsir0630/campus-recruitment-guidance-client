@@ -224,14 +224,17 @@ export default {
     toPage(url) {
       uni.navigateTo({url})
     },
+    async loadAllDynamicList () {
+      if (this.dynamic.total === 0) {
+        await this.getDynamicList(null)
+      }
+    },
     /**
      * 根据动态 id 渲染动态详情
      * @param id
      */
     onLoad ({id}) {
-      if (this.dynamic.total === 0) {
-        this.getDynamicList(null)
-      }
+      this.loadAllDynamicList()
       // 类型转换，坑
       id = +id
       for (let dt of this.dynamic.list) {
@@ -246,6 +249,14 @@ export default {
       }
       console.log(this.allLikeList)
       this.showLikeList2Name()
+    },
+    onShareAppMessage(res) {
+      if (res.from === 'button') {// 来自页面内分享按钮
+        console.log(res.target)
+      }
+      return {
+        path: '/pages/index/detail/index?id='+this.item.detail.id
+      }
     },
     async showLikeList2Name () {
       const {data} = await this.$api.user.getNickNameByOpenIds(this.allLikeList.join(","))

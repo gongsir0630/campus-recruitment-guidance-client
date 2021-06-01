@@ -172,11 +172,14 @@ export default {
       }
       this.isFollow = !this.isFollow
     },
-    onLoad ({id}) {
+    async loadAllData () {
       // 修复分享页面无数据
       if (this.member.total === 0) {
-        this.getMemberList(null)
+        await this.getMemberList(null)
       }
+    },
+    onLoad ({id}) {
+      this.loadAllData()
       // 类型转换，坑
       id = +id
       console.log("查看成员详情: "+id)
@@ -187,7 +190,15 @@ export default {
       console.log(this.item)
       this.isFollow = (this.item.likeList || '').split(',').includes(this.wxUser.openId)
       console.log(this.isFollow)
-    }
+    },
+    onShareAppMessage(res) {
+      if (res.from === 'button') {// 来自页面内分享按钮
+        console.log(res.target)
+      }
+      return {
+        path: '/pages/help/detail/index?id='+this.item.id
+      }
+    },
   }
 }
 </script>
