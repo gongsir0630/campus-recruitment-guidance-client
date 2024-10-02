@@ -14,9 +14,9 @@ export default {
      * @returns {Promise<void>}
      */
     async autoLogin() {
-      const {code, data, errMsg} = await this.$api.user.getProfile()
+      const {data} = await this.$api.user.getProfile()
       // 获取用户信息
-      const userInfo = data.userInfo
+      const userInfo = data?.userInfo
       this.setUserInfo(userInfo)
       // eduInfo
       await this.getEduInfoById(this.wxUser.eduId)
@@ -48,7 +48,7 @@ export default {
 <style>
 /*每个页面公共css */
 /* vant - weapp */
-@import '/wxcomponents/@vant/weapp/dist/common/index.wxss';
+@import './wxcomponents/@vant/weapp/dist/common/index.wxss';
 
 /* color ui */
 @import 'colorui/main.css';
